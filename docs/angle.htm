@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lens Angle of View Calculator</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .controls { margin-bottom: 20px; }
+        .control-group { display: flex; gap: 10px; align-items: center; }
+        canvas { border: 1px solid #ccc; cursor: move; }
+        input[type="number"] { width: 100px; }
+        .radio-group { display: flex; gap: 15px; }
+        .radio-label { display: flex; align-items: center; gap: 5px; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div class="control-group">
+            <label>CMOS：</label>
+            <select id="sensorSize" style="width: 300px;">
+                <option value="MF_H">【53.40 mm x 40.00 mm】 Medium Format (Hasselblad H6D-100c) (4:3)</option>
+                <option value="MF_PH">【44.00 mm x 33.00 mm】 Medium Format (Phase One, Hasselblad X1D) (4:3)</option>
+                <option value="MF_GFX">【43.80 mm x 32.90 mm】 Medium Format (Fujifilm GFX) (4:3)</option>
+                <option value="FF" selected="selected">【36.00 mm x 24.00 mm】 FullFrame (3:2)</option>
+                <option value="APSH">【27.90 mm x 18.60 mm】 APS-H (3:2)</option>
+                <option value="APSC_S">【23.60 mm x 15.60 mm】 APS-C (Sony,Fujifilm,Nikon) (3:2)</option>
+                <option value="APSC_C">【22.20 mm x 14.80 mm】 APS-C Canon (3:2)</option>
+                <option value="1_8in">【21.90 mm x 16.40 mm】 1.8″ (4:3)</option>
+                <option value="1_7in">【20.80 mm x 15.60 mm】 1.7″ (4:3)</option>
+                <option value="1_6in">【20.10 mm x 15.05 mm】 1.6″ (4:3)</option>
+                <option value="1_5in">【18.70 mm x 14.00 mm】 1.5″ (4:3)</option>
+                <option value="1_4in">【18.00 mm x 13.50 mm】 1.4″ (4:3)</option>
+                <option value="M43">【17.30 mm x 13.00 mm】 M43 (4:3)</option>
+                <option value="1_2in">【16.00 mm x 12.00 mm】 1.2″ (4:3)</option>
+                <option value="1_1in">【14.70 mm x 11.00 mm】 1.1″ (4:3)</option>
+                <option value="1in">【12.80 mm x 9.60 mm】 1″ (4:3)</option>
+                <option value="1in1_1">【11.60 mm x 8.70 mm】 1/1.1″ (4:3)</option>
+                <option value="1in1_2">【10.67 mm x 8.00 mm】 1/1.2″ (4:3)</option>
+                <option value="1in1_3">【9.60 mm x 7.20 mm】 1/1.3″ (4:3)</option>
+                <option value="1in1_4">【8.90 mm x 6.67 mm】 1/1.4″ (4:3)</option>
+                <option value="2in3">【8.80 mm x 6.60 mm】 2/3″ (4:3)</option>
+                <option value="1in1_6">【8.00 mm x 6.00 mm】 1/1.6″ (4:3)</option>
+                <option value="1in1_7">【7.60 mm x 5.70 mm】 1/1.7″ (4:3)</option>
+                <option value="1in1_8">【7.20 mm x 5.40 mm】 1/1.8″ (4:3)</option>
+                <option value="1in1_9">【6.80 mm x 5.10 mm】 1/1.9″ (4:3)</option>
+                <option value="1in2">【6.67 mm x 5.00 mm】 1/2″ (4:3)</option>
+                <option value="1in2_1">【6.40 mm x 4.80 mm】 1/2.1″ (4:3)</option>
+                <option value="1in2_2">【6.16 mm x 4.62 mm】 1/2.2″ (4:3)</option>
+                <option value="1in2_3">【6.00 mm x 4.50 mm】 1/2.3″ (4:3)</option>
+                <option value="1in2_4">【5.90 mm x 4.43 mm】 1/2.4″ (4:3)</option>
+                <option value="1in2_5">【5.76 mm x 4.29 mm】 1/2.5″ (4:3)</option>
+                <option value="1in2_6">【5.50 mm x 4.10 mm】 1/2.6″ (4:3)</option>
+                <option value="1in2_7">【5.30 mm x 4.00 mm】 1/2.7″ (4:3)</option>
+                <option value="1in2_8">【5.10 mm x 3.83 mm】 1/2.8″ (4:3)</option>
+                <option value="1in2_9">【4.90 mm x 3.67 mm】 1/2.9″ (4:3)</option>
+                <option value="1in3">【4.80 mm x 3.60 mm】 1/3″ (4:3)</option>
+                <option value="1in3_2">【4.54 mm x 3.42 mm】 1/3.2″ (4:3)</option>
+                <option value="1in3_6">【4.00 mm x 3.00 mm】 1/3.6″ (4:3)</option>
+                <option value="1in4">【3.60 mm x 2.70 mm】 1/4″ (4:3)</option>
+                <option value="1in5">【2.88 mm x 2.16 mm】 1/5″ (4:3)</option>
+            </select>
+            <span data-title="CMOS sensor size does not refer to diagonal line but to the size of vacuum camera tubes, which is why a '1-inch' sensor actually measures 12.8 mm x 9.6 mm, with a diagonal of 0.63'' (16mm), not corresponding to the traditional meaning of a 1-inch sensor.">[?]</span>
+        </div>
+        <div class="control-group">
+            <label>Focus Length：</label>
+            <input type="number" id="focalLength" min="1" max="20000" value="50" step="1">
+            <span>mm</span>
+            <button id="addToCompareBtn">Add to Compare List</button>
+            <button onclick="document.getElementById('compareList').value='';state.compareList=[];updateUI();">Clear Compare List</button>
+        </div>
+        <div class="control-group">
+            <label>35mm Equivalent Focal Length：</label>
+            <span id="focalLengthRemark"></span>
+        </div>
+        <div class="control-group">
+            <label>Angle of View (Field of View)：</label>
+            <span id="angleDisplay">0</span>°
+        </div>
+        <div class="control-group">
+            <label>Angle Type：</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="angleType" value="diagonal" checked> Diagonal
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="angleType" value="horizontal"> Horizontal
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="angleType" value="vertical"> Vertical
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>Compare Viewport List：</label>
+            <input type="text" id="compareList" placeholder="FF/50,FF/85,APSC_S/35" value="FF/50,FF/35" style="width: 300px;">
+            <button onclick="reset()">Reset</button>
+        </div>
+        <div class="control-group">
+            <label>Compare Viewport Position:</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="positionType" value="center-center" checked> Center Center
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="positionType" value="left-bottom"> Left Bottom
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="positionType" value="left-center"> Left Center
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="positionType" value="center-bottom"> Center Bottom
+                </label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>Compare Viewport Reference Image:</label>
+            <input type="file" id="compareImage" accept="image/*" style="width: 100px;">
+            <button id="uploadBtn">Upload</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script>
+        // 常量和配置
+        const CONFIG = {
+            SENSOR_TYPES: {
+                MF_H: { width: 53.4, height: 40, label: 'Medium Format (4:3) Hasselblad H6D-100c', ratio: '4:3' },
+                MF_PH: { width: 44, height: 33, label: 'Medium Format (4:3) Phase One', ratio: '4:3' },
+                MF_GFX: { width: 43.8, height: 32.9, label: 'Medium Format (4:3) GFX', ratio: '4:3' },
+                FF: { width: 36, height: 24, label: 'Full Frame (3:2)', ratio: '3:2' },
+                APSH: { width: 27.9, height: 18.6, label: 'APS-H (3:2)', ratio: '3:2' },
+                APSC_S: { width: 23.6, height: 15.6, label: 'APS-C (Sony, Fujifilm, Nikon) (3:2)', ratio: '3:2' },
+                APSC_C: { width: 22.2, height: 14.8, label: 'APS-C (Canon) (3:2)', ratio: '3:2' },
+                '1_8in': { width: 21.9, height: 16.4, label: '1.8" (4:3)', ratio: '4:3' },
+                '1_7in': { width: 20.8, height: 15.6, label: '1.7" (4:3)', ratio: '4:3' },
+                '1_6in': { width: 20.1, height: 15.05, label: '1.6" (4:3)', ratio: '4:3' },
+                '1_5in': { width: 18.7, height: 14, label: '1.5" (4:3)', ratio: '4:3' },
+                '1_4in': { width: 18.0, height: 13.5, label: '1.4" (4:3)', ratio: '4:3' },
+                M43: { width: 17.3, height: 13, label: 'M43 (4:3)', ratio: '4:3' },
+                '1_2in': { width: 16, height: 12, label: '1.2" (4:3)', ratio: '4:3' },
+                '1_1in': { width: 14.7, height: 11, label: '1.1" (4:3)', ratio: '4:3' },
+                '1in': { width: 12.8, height: 9.6, label: '1" (4:3)', ratio: '4:3' },
+                '1in1_1': { width: 11.6, height: 8.7, label: '1/1.1" (4:3)', ratio: '4:3' },
+                '1in1_2': { width: 10.67, height: 8, label: '1/1.2" (4:3)', ratio: '4:3' },
+                '1in1_3': { width: 9.6, height: 7.2, label: '1/1.3" (4:3)', ratio: '4:3' },
+                '1in1_4': { width: 8.9, height: 6.67, label: '1/1.4" (4:3)', ratio: '4:3' },
+                '2in3': { width: 8.8, height: 6.6, label: '2/3" (4:3)', ratio: '4:3' },
+                '1in1_6': { width: 8, height: 6, label: '1/1.6" (4:3)', ratio: '4:3' },
+                '1in1_7': { width: 7.6, height: 5.7, label: '1/1.7" (4:3)', ratio: '4:3' },
+                '1in1_8': { width: 7.2, height: 5.4, label: '1/1.8" (4:3)', ratio: '4:3' },
+                '1in1_9': { width: 6.8, height: 5.1, label: '1/1.9" (4:3)', ratio: '4:3' },
+                '1in2': { width: 6.67, height: 5.0, label: '1/2" (4:3)', ratio: '4:3' },
+                '1in2_1': { width: 6.4, height: 4.8, label: '1/2.1" (4:3)', ratio: '4:3' },
+                '1in2_2': { width: 6.16, height: 4.62, label: '1/2.2" (4:3)', ratio: '4:3' },
+                '1in2_3': { width: 6.0, height: 4.5, label: '1/2.3" (4:3)', ratio: '4:3' },
+                '1in2_4': { width: 5.9, height: 4.43, label: '1/2.4" (4:3)', ratio: '4:3' },
+                '1in2_5': { width: 5.76, height: 4.29, label: '1/2.5" (4:3)', ratio: '4:3' },
+                '1in2_6': { width: 5.5, height: 4.1, label: '1/2.6" (4:3)', ratio: '4:3' },
+                '1in2_7': { width: 5.3, height: 4, label: '1/2.7" (4:3)', ratio: '4:3' },
+                '1in2_8': { width: 5.1, height: 3.83, label: '1/2.8" (4:3)', ratio: '4:3' },
+                '1in2_9': { width: 4.9, height: 3.67, label: '1/2.9" (4:3)', ratio: '4:3' },
+                '1in3': { width: 4.8, height: 3.6, label: '1/3" (4:3)', ratio: '4:3' },
+                '1in3_2': { width: 4.54, height: 3.42, label: '1/3.2" (4:3)', ratio: '4:3' },
+                '1in3_6': { width: 4, height: 3, label: '1/3.6" (4:3)', ratio: '4:3' },
+                '1in4': { width: 3.6, height: 2.7, label: '1/4" (4:3)', ratio: '4:3' },
+                '1in5': { width: 2.88, height: 2.16, label: '1/5" (4:3)', ratio: '4:3' },
+            },
+            SCALE_FACTOR: 2, // CMOS 繪製放大倍數
+            MIN_SCALE: 0.05,
+            MAX_SCALE: 100,
+            MIN_FOCAL: 1,
+            MAX_FOCAL: 20000
+        };
+
+        // 應用狀態
+        const state = {
+            scale: 1,
+            offset: { x: 0, y: 0 },
+            focal: 50,
+            sensor: 'FF',
+            angleType: 'diagonal',
+            positionType: 'center-center',
+            drag: {
+                active: false,
+                focal: false,
+                last: { x: 0, y: 0 }
+            },
+            compareList: [
+                'FF/50',
+                'FF/35',
+            ],
+            referenceImage: null,
+            drawImage: true,
+        };
+
+        // DOM 元素
+        const elements = {
+            canvas: document.getElementById('canvas'),
+            sensor: document.getElementById('sensorSize'),
+            focal: document.getElementById('focalLength'),
+            focalRemark: document.getElementById('focalLengthRemark'),
+            angle: document.getElementById('angleDisplay'),
+            angleTypes: document.getElementsByName('angleType'),
+            positionTypes: document.getElementsByName('positionType'),
+            compareList: document.getElementById('compareList'),
+            compareImage: document.getElementById('compareImage'),
+            addToCompareBtn: document.getElementById('addToCompareBtn'),
+            uploadBtn: document.getElementById('uploadBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+        };
+        const ctx = elements.canvas.getContext('2d');
+
+        // 核心計算模組
+        const calculator = {
+            // 計算鏡頭視角
+            getAngle(sensorType='FF', angleType='diagonal', focal=50) {
+                const sensor = CONFIG.SENSOR_TYPES[sensorType];
+                const size = {
+                    diagonal: Math.sqrt(sensor.width ** 2 + sensor.height ** 2),
+                    horizontal: sensor.width,
+                    vertical: sensor.height
+                }[angleType];
+                return 2 * Math.atan(size / (2 * focal)) * 180 / Math.PI;
+            },
+
+            getFFEquivalentFocal(angleDegree, angleType) {
+                const sensor = CONFIG.SENSOR_TYPES[state.sensor];
+                const ffSensor = CONFIG.SENSOR_TYPES['FF'];
+                let sensorDimension = Math.sqrt(ffSensor.width ** 2 + ffSensor.height ** 2);
+                if (angleType == 'horizontal') {
+                    sensorDimension = ffSensor.width;
+                } else if (angleType == 'vertical') {
+                    sensorDimension = ffSensor.height;
+                }
+                const mmEquivalentFocal = sensorDimension / (2 * Math.tan(angleDegree * Math.PI / 360));
+                return mmEquivalentFocal;
+            },
+
+            // 獲取基準位置
+            getBasePosition() {
+                return {
+                    x: elements.canvas.width / 2,
+                    y: elements.canvas.height / 2,
+                    getFocalY() {
+                        return this.y + 100 - state.focal * 2;
+                    }
+                };
+            },
+
+            // 從畫布座標轉換到視圖座標
+            canvasToView(canvasX, canvasY) {
+                return {
+                    x: (canvasX - state.offset.x) / state.scale,
+                    y: (canvasY - state.offset.y) / state.scale
+                };
+            },
+
+            // 判斷點擊是否在焦點上
+            isOnFocalPoint(canvasX, canvasY) {
+                const view = this.canvasToView(canvasX, canvasY);
+                const base = this.getBasePosition();
+                return Math.abs(view.x - base.x) < 10 && Math.abs(view.y - base.getFocalY()) < 10;
+            },
+
+            // 從滑鼠Y座標計算焦距
+            calculateFocal(canvasY) {
+                const viewY = this.canvasToView(0, canvasY).y;
+                const base = this.getBasePosition();
+                return (base.y + 100 - viewY) / 2;
+            }
+        };
+
+        // 繪圖模組
+        const renderer = {
+
+            clear() {
+                ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+            },
+
+            withTransform(callback) {
+                ctx.save();
+                ctx.translate(state.offset.x, state.offset.y);
+                ctx.scale(state.scale, state.scale);
+                callback();
+                ctx.restore();
+            },
+
+            focalLine(base) {
+                ctx.beginPath();
+                ctx.moveTo(base.x, base.y + 100);
+                ctx.lineTo(base.x, base.getFocalY());
+                ctx.strokeStyle = '#f00';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f00';
+                ctx.fillText('Focal Length', base.x + 10, (base.getFocalY() + base.y + 70) / 2);
+                ctx.fillText(`${state.focal.toFixed(0)} mm`, base.x + 10, (base.getFocalY() + base.y + 100) / 2);
+            },
+
+            focalPoint(base) {
+                ctx.beginPath();
+                ctx.arc(base.x, base.getFocalY(), 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#f00';
+                ctx.fill();
+            },
+
+            angleText(base) {
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#000';
+                ctx.fillText(
+                    `${calculator.getAngle(state.sensor, state.angleType, state.focal).toFixed(3)}°`,
+                    base.x + 10,
+                    base.getFocalY() - 10
+                );
+            },
+
+            sensorAndAngle(base) {
+                const sensor = CONFIG.SENSOR_TYPES[state.sensor];
+                let sw = sensor.width;
+                let sh = sensor.height;
+
+                if (state.angleType == 'vertical') {
+                    sw = sensor.height;
+                    sh = sensor.width;
+                }
+
+                const w =  sw * CONFIG.SCALE_FACTOR;
+                const h =  sh * CONFIG.SCALE_FACTOR;
+
+                ctx.save();
+                ctx.translate(base.x, base.y + 100);
+
+                // 繪製 CMOS 邊框
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-w/2, -h/2, w, h);
+
+                // 繪製視角線
+                ctx.beginPath();
+                ctx.strokeStyle = '#0a0';
+                ctx.lineWidth = 1;
+
+                switch(state.angleType) {
+                    case 'diagonal':
+                        ctx.moveTo(-w/2, -h/2); // 左上角
+                        ctx.lineTo(0, -state.focal * 2); // 焦點
+                        ctx.lineTo(w/2, h/2); // 右下角
+                        // 繪製對角線
+                        ctx.moveTo(-w/2, -h/2); // 左上角
+                        ctx.lineTo(w/2, h/2); // 右下角
+                        break;
+                    default: // horizontal or vertical
+                        ctx.moveTo(-w/2, 0);
+                        ctx.lineTo(0, -state.focal * 2);
+                        ctx.lineTo(w/2, 0);
+                        ctx.moveTo(-w/2, 0);
+                        ctx.lineTo(w/2, 0);
+                }
+                ctx.stroke();
+
+                // 繪製 CMOS Text
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#000';
+                ctx.fillText(`${sw}mm`, -5, h/2 + 15);
+                ctx.fillText(`${sh}mm`, w/2 + 5, 0);
+                ctx.restore();
+            },
+
+            viewCompare(base) {
+                const colors = ['#f00', '#080', '#00f', '#f80', '#f0f', '#0ff', '#000'];
+                let centerX = base.x + 500;
+                let centerY = base.y + 100;
+                let viewDistance = 400; // 垂直距離
+                let lineWidth = 0.5;
+                let verifiedItems = state.compareList.map(item => {
+                    const [sensor, focal] = item.split('/').map(i => i.trim());
+                    if (CONFIG.SENSOR_TYPES[sensor] && !isNaN(focal) && parseFloat(focal) > 0) {
+                        return { sensor, focal: parseFloat(focal) };
+                    }
+                    return null;
+                }).filter(Boolean);
+                let rects = [];
+                while (true) {
+                    rects = verifiedItems.map(item => {
+                        let horizontalAngle = calculator.getAngle(item.sensor, 'horizontal', item.focal)/2;
+                        let verticalAngle = calculator.getAngle(item.sensor, 'vertical', item.focal)/2;
+                        let w = Math.tan(horizontalAngle * Math.PI / 180) * viewDistance * 2;
+                        let h = Math.tan(verticalAngle * Math.PI / 180) * viewDistance * 2;
+                        console.log(item.sensor, item.focal, viewDistance, horizontalAngle, verticalAngle, w, h);
+                        return {
+                            width: w,
+                            height: h,
+                            focal: item.focal,
+                            sensor: item.sensor,
+                        };
+                    });
+                    if (rects.every(item => item.width > 5 && item.height > 5)) {
+                        break;
+                    }else{
+                        viewDistance += 50;
+                        console.log('auto adjust viewDistance', viewDistance);
+                        if (viewDistance > 20000) {
+                            console.error('無法計算視角，請檢查輸入的焦距和感光元件類型。');
+                            break;
+                        }
+                    }
+                    if (rects.length < 0) break;
+                }
+                if (rects.length<0) return;
+                let space = viewDistance;
+                for (let i = 0; i < rects.length; i++) {
+                    if (space < (rects[i].width/2)) {
+                        space = (rects[i].width/2);
+                    }
+                }
+                centerX = base.x + space + 100;
+                centerY = base.y + 100;
+                if (state.positionType == 'left-bottom' || state.positionType == 'left-center') {
+                    centerX -= rects[0].width/2;
+                }
+                if (state.positionType == 'center-bottom' || state.positionType == 'left-bottom') {
+                    centerY += rects[0].height/2;
+                }
+                ctx.translate(centerX, centerY);
+                rects.forEach((item, index) => {
+                    let coodX = -item.width / 2;
+                    let coodY = -item.height / 2;
+                    if (state.positionType == 'left-bottom') {
+                        coodX = 0;
+                        coodY = -item.height;
+                    } else if (state.positionType == 'left-center') {
+                        coodX = 0;
+                        coodY = -item.height / 2;
+                    } else if (state.positionType == 'center-bottom') {
+                        coodX = -item.width / 2;
+                        coodY = -item.height;
+                    }
+                    if (index == 0 && state.drawImage && state.referenceImage) {
+                        ctx.drawImage(state.referenceImage, coodX, coodY, item.width, item.height);
+                    }
+                    ctx.strokeStyle = colors[index % colors.length];
+                    ctx.lineWidth = lineWidth;
+                    ctx.strokeRect(coodX, coodY, item.width, item.height);
+                    ctx.fillStyle = ctx.strokeStyle
+                    ctx.fillText(`${CONFIG.SENSOR_TYPES[item.sensor].label} ${item.focal}mm`, coodX + 5, coodY - 5);
+                });
+                ctx.save();
+                ctx.restore();
+            }
+        };
+
+        // 繪製全部內容
+        function render() {
+            renderer.clear();
+            renderer.withTransform(() => {
+                const base = calculator.getBasePosition();
+                renderer.sensorAndAngle(base);
+                renderer.focalLine(base);
+                renderer.focalPoint(base);
+                renderer.angleText(base);
+                renderer.viewCompare(base);
+            });
+        }
+
+        // 更新UI顯示
+        function updateUI() {
+            if (state.sensor !== 'FF') {
+                let angle_ori = calculator.getAngle(state.sensor, state.angleType, state.focal).toFixed(3);
+                let mm_ff = calculator.getFFEquivalentFocal(angle_ori, state.angleType);
+                let ratio = parseFloat((mm_ff / state.focal).toFixed(3));
+                elements.focalRemark.textContent = `${mm_ff.toFixed(3)}mm (~${ratio.toFixed(1)}x)`;
+            } else {
+                elements.focalRemark.textContent = state.focal.toFixed(0) + 'mm';
+            }
+            elements.angle.textContent = calculator.getAngle(state.sensor, state.angleType, state.focal).toFixed(5);
+            render();
+        }
+
+        function reset() {
+            state.sensor = 'FF';
+            state.focal = 50;
+            state.angleType = 'diagonal';
+            state.compareList = [];
+            state.positionType = 'center-center';
+            state.offset = { x: 0, y: 0 };
+            state.scale = 1;
+            elements.sensor.value = 'FF';
+            elements.focal.value = 50;
+            elements.angleTypes[0].checked = true;
+            elements.positionTypes[0].checked = true;
+            elements.compareList.value = '';
+            updateUI();
+        }
+
+        // 事件處理模組
+        const eventHandlers = {
+            mousedown(e) {
+                const rect = elements.canvas.getBoundingClientRect();
+                const canvasX = e.clientX - rect.left;
+                const canvasY = e.clientY - rect.top;
+                state.drag.active = true;
+                state.drag.focal = calculator.isOnFocalPoint(canvasX, canvasY);
+                state.drag.last = { x: e.clientX, y: e.clientY };
+            },
+
+            mousemove(e) {
+                if (!state.drag.active) return;
+
+                if (state.drag.focal) {
+                    const rect = elements.canvas.getBoundingClientRect();
+                    const canvasY = e.clientY - rect.top;
+                    const newFocal = calculator.calculateFocal(canvasY);
+                    state.focal = Math.max(CONFIG.MIN_FOCAL, Math.min(CONFIG.MAX_FOCAL, newFocal));
+                    elements.focal.value = Math.round(state.focal);
+                } else {
+                    const dx = e.clientX - state.drag.last.x;
+                    const dy = e.clientY - state.drag.last.y;
+                    state.offset.x += dx;
+                    state.offset.y += dy;
+                    state.drag.last = { x: e.clientX, y: e.clientY };
+                }
+                updateUI();
+            },
+
+            mouseup() {
+                state.drag.active = false;
+                state.drag.focal = false;
+            },
+
+            wheel(e) {
+                e.preventDefault();
+                const rect = elements.canvas.getBoundingClientRect();
+
+                // 滑鼠相對於畫布的位置
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // 計算滑鼠位置在縮放前的坐標系中的位置
+                const viewX = (mouseX - state.offset.x) / state.scale;
+                const viewY = (mouseY - state.offset.y) / state.scale;
+
+                // 計算新的縮放比例
+                const delta = -Math.sign(e.deltaY) * 0.1;
+                const newScale = Math.max(CONFIG.MIN_SCALE, Math.min(CONFIG.MAX_SCALE, state.scale + delta));
+
+                // 調整偏移量以保持滑鼠指針下方的點不變
+                state.offset.x = mouseX - viewX * newScale;
+                state.offset.y = mouseY - viewY * newScale;
+
+                state.scale = newScale;
+                render();
+            }
+        };
+
+        // 初始化應用
+        function initialize() {
+            // 設置畫布大小
+            function resizeCanvas() {
+                elements.canvas.width = window.innerWidth - 40;
+                elements.canvas.height = window.innerHeight - 200;
+            }
+
+            // 添加事件監聽器
+            function setupEventListeners() {
+                elements.canvas.addEventListener('mousedown', eventHandlers.mousedown);
+                elements.canvas.addEventListener('mousemove', eventHandlers.mousemove);
+                elements.canvas.addEventListener('mouseup', eventHandlers.mouseup);
+                elements.canvas.addEventListener('mouseleave', eventHandlers.mouseup);
+                elements.canvas.addEventListener('wheel', eventHandlers.wheel);
+
+                elements.sensor.addEventListener('change', e => {
+                    state.sensor = e.target.value;
+                    updateUI();
+                });
+
+                elements.focal.addEventListener('input', e => {
+                    state.focal = Math.max(CONFIG.MIN_FOCAL, Math.min(CONFIG.MAX_FOCAL, Number(e.target.value)));
+                    updateUI();
+                });
+
+                elements.angleTypes.forEach(input => {
+                    input.addEventListener('change', e => {
+                        state.angleType = e.target.value;
+                        updateUI();
+                    });
+                });
+
+                elements.positionTypes.forEach(input => {
+                    input.addEventListener('change', e => {
+                        state.positionType = e.target.value;
+                        updateUI();
+                    });
+                });
+
+                elements.compareList.addEventListener('input', e => {
+                    state.compareList = e.target.value.split(',').map(item => item.trim()).filter(Boolean);
+                    updateUI();
+                });
+
+                elements.compareImage.addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            state.referenceImage = new Image();
+                            state.referenceImage.src = reader.result;
+                            state.drawImage = true;
+                            render();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                elements.uploadBtn.addEventListener('click', () => {
+                    if (state.referenceImage) {
+                        state.drawImage = true;
+                        render();
+                    }
+                });
+
+                elements.clearBtn.addEventListener('click', () => {
+                    state.drawImage = false;
+                    render();
+                });
+
+                elements.addToCompareBtn.addEventListener('click', () => {
+                    const sensor = state.sensor;
+                    const focal = state.focal;
+                    state.compareList.push(`${sensor}/${focal}`);
+                    state.compareList = [...new Set(state.compareList)]; // 去重
+                    elements.compareList.value = state.compareList.join(',');
+                    updateUI();
+                });
+
+                window.addEventListener('resize', () => {
+                    resizeCanvas();
+                    render();
+                });
+            }
+
+            resizeCanvas();
+            setupEventListeners();
+            updateUI();
+        }
+
+        // 啟動應用
+        initialize();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'custom-tooltip';
+            tooltip.style.position = 'absolute';
+            tooltip.style.display = 'none';
+            tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            tooltip.style.color = 'white';
+            tooltip.style.padding = '5px 10px';
+            tooltip.style.borderRadius = '4px';
+            tooltip.style.fontSize = '14px';
+            tooltip.style.zIndex = '10000';
+            tooltip.style.pointerEvents = 'none';
+            document.body.appendChild(tooltip);
+            const elementsWithTooltips = document.querySelectorAll('[data-title]');
+            elementsWithTooltips.forEach(element => {
+                element.addEventListener('mouseover', function(e) {
+                    const title = this.getAttribute('data-title');
+                    if (title) {
+                        tooltip.textContent = title;
+                        tooltip.style.display = 'block';
+                        updateTooltipPosition(e);
+                    }
+                });
+                element.addEventListener('mousemove', function(e) {
+                    updateTooltipPosition(e);
+                });
+                element.addEventListener('mouseout', function() {
+                    tooltip.style.display = 'none';
+                });
+            });
+            function updateTooltipPosition(e) {
+                const x = e.clientX + 10;
+                const y = e.clientY + 10;
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                if (tooltipRect.right > windowWidth) {
+                    tooltip.style.left = (windowWidth - tooltipRect.width - 10) + 'px';
+                }
+                if (tooltipRect.bottom > windowHeight) {
+                    tooltip.style.top = (windowHeight - tooltipRect.height - 10) + 'px';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
