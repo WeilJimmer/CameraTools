@@ -75,6 +75,14 @@ The calculator uses precise optical formulas to determine the exact field of vie
 
 The calculator uses advanced trigonometric functions to compute the precise angular field of view rather than relying on approximations. All calculations happen in real-time on the client side with no server dependencies.
 
+## Interesting Optical Insight
+
+When comparing multiple different sensor sizes at the same focal length (for example, all at 50mm), the resulting field of view rectangles directly represent the relative physical sizes of the sensors themselves. This provides a visually intuitive comparison of sensor sizes and their real-world impact on image framing.
+
+For instance, adding a full-frame, APS-C, and Micro Four Thirds sensor all at 50mm to your comparison list will display rectangles that perfectly match the proportional size differences between these sensors. This makes it easy to visualize exactly how much more scene a larger sensor captures compared to a smaller one when using identical focal lengths.
+
+This feature is particularly useful for photographers transitioning between camera systems or working with multiple camera bodies, as it clearly illustrates the practical differences in field of view without requiring complex calculations.
+
 ## Contributing
 
 Contributions to improve the calculator are welcome. Please feel free to submit issues or pull requests to enhance functionality or fix bugs.
