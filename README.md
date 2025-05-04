@@ -4,7 +4,11 @@ Camera Lens Angle of View Calculator (Web) 相機鏡頭可視角度計算機 (�
 
 An advanced web-based tool for precisely calculating and visualizing the field of view (FOV) for various camera sensors and lens combinations.
 
-Live Demo (線上使用) [LINK](https://lens-angle.weil.app.wbftw.org/angle.htm)
+Live Demo (線上使用) :
+
+[Get Started with the online free Calculator →](https://lens-angle.weil.app.wbftw.org/angle.htm)
+
+[More detail in Wiki →](wiki)
 
 ## Feature
 
