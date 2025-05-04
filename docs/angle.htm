@@ -29,9 +29,10 @@
                 <option value="1_6in">【20.10 mm x 15.05 mm】 1.6″ (4:3)</option>
                 <option value="1_5in">【18.70 mm x 14.00 mm】 1.5″ (4:3)</option>
                 <option value="1_4in">【18.00 mm x 13.50 mm】 1.4″ (4:3)</option>
-                <option value="M43">【17.30 mm x 13.00 mm】 M43 (4:3)</option>
+                <option value="M43">【17.30 mm x 13.00 mm】 M4/3 (4:3)</option>
                 <option value="1_2in">【16.00 mm x 12.00 mm】 1.2″ (4:3)</option>
                 <option value="1_1in">【14.70 mm x 11.00 mm】 1.1″ (4:3)</option>
+                <option value="1inR32">【13.20 mm x 8.80 mm】 1″ (3:2)</option>
                 <option value="1in">【12.80 mm x 9.60 mm】 1″ (4:3)</option>
                 <option value="1in1_1">【11.60 mm x 8.70 mm】 1/1.1″ (4:3)</option>
                 <option value="1in1_2">【10.67 mm x 8.00 mm】 1/1.2″ (4:3)</option>
@@ -91,7 +92,7 @@
         </div>
         <div class="control-group">
             <label>Compare Viewport List：</label>
-            <input type="text" id="compareList" placeholder="FF/50,FF/85,APSC_S/35" value="FF/50,FF/35" style="width: 300px;">
+            <input type="text" id="compareList" placeholder="FF/50,FF/85,APSC_S/35" value="FF/35,FF/50" style="width: 300px;">
             <button onclick="reset()">Reset</button>
         </div>
         <div class="control-group">
@@ -138,6 +139,7 @@
                 M43: { width: 17.3, height: 13, label: 'M43 (4:3)', ratio: '4:3' },
                 '1_2in': { width: 16, height: 12, label: '1.2" (4:3)', ratio: '4:3' },
                 '1_1in': { width: 14.7, height: 11, label: '1.1" (4:3)', ratio: '4:3' },
+                '1inR32': { width: 13.2, height: 8.8, label: '1" (3:2)', ratio: '3:2' },
                 '1in': { width: 12.8, height: 9.6, label: '1" (4:3)', ratio: '4:3' },
                 '1in1_1': { width: 11.6, height: 8.7, label: '1/1.1" (4:3)', ratio: '4:3' },
                 '1in1_2': { width: 10.67, height: 8, label: '1/1.2" (4:3)', ratio: '4:3' },
@@ -185,8 +187,8 @@
                 last: { x: 0, y: 0 }
             },
             compareList: [
-                'FF/50',
                 'FF/35',
+                'FF/50',
             ],
             referenceImage: null,
             drawImage: true,
@@ -223,7 +225,6 @@
             },
 
             getFFEquivalentFocal(angleDegree, angleType) {
-                const sensor = CONFIG.SENSOR_TYPES[state.sensor];
                 const ffSensor = CONFIG.SENSOR_TYPES['FF'];
                 let sensorDimension = Math.sqrt(ffSensor.width ** 2 + ffSensor.height ** 2);
                 if (angleType == 'horizontal') {
@@ -368,7 +369,7 @@
             },
 
             viewCompare(base) {
-                const colors = ['#f00', '#080', '#00f', '#f80', '#f0f', '#0ff', '#000'];
+                const colors = ['#f00', '#080', '#00f', '#f80', '#f0f', '#08f', '#000', '#888', '#f0a', '#0af'];
                 let centerX = base.x + 500;
                 let centerY = base.y + 100;
                 let viewDistance = 400; // 垂直距離
@@ -383,16 +384,18 @@
                 let rects = [];
                 while (true) {
                     rects = verifiedItems.map(item => {
-                        let horizontalAngle = calculator.getAngle(item.sensor, 'horizontal', item.focal)/2;
-                        let verticalAngle = calculator.getAngle(item.sensor, 'vertical', item.focal)/2;
-                        let w = Math.tan(horizontalAngle * Math.PI / 180) * viewDistance * 2;
-                        let h = Math.tan(verticalAngle * Math.PI / 180) * viewDistance * 2;
+                        let diagonalAngle = calculator.getAngle(item.sensor, 'diagonal', item.focal);
+                        let horizontalAngle = calculator.getAngle(item.sensor, 'horizontal', item.focal);
+                        let verticalAngle = calculator.getAngle(item.sensor, 'vertical', item.focal);
+                        let w = Math.tan(horizontalAngle * Math.PI / 360) * viewDistance * 2;
+                        let h = Math.tan(verticalAngle * Math.PI / 360) * viewDistance * 2;
                         console.log(item.sensor, item.focal, viewDistance, horizontalAngle, verticalAngle, w, h);
                         return {
                             width: w,
                             height: h,
                             focal: item.focal,
                             sensor: item.sensor,
+                            angle: diagonalAngle,
                         };
                     });
                     if (rects.every(item => item.width > 5 && item.height > 5)) {
@@ -443,7 +446,12 @@
                     ctx.lineWidth = lineWidth;
                     ctx.strokeRect(coodX, coodY, item.width, item.height);
                     ctx.fillStyle = ctx.strokeStyle
-                    ctx.fillText(`${CONFIG.SENSOR_TYPES[item.sensor].label} ${item.focal}mm`, coodX + 5, coodY - 5);
+                    let ffeq = calculator.getFFEquivalentFocal(item.angle, 'diagonal').toFixed(1);
+                    if (item.sensor != 'FF') {
+                        ctx.fillText(`${CONFIG.SENSOR_TYPES[item.sensor].label} ${item.focal}mm 〔≈${ffeq}mm EFL〕`, coodX + 5, coodY - 5);
+                    }else{
+                        ctx.fillText(`${CONFIG.SENSOR_TYPES[item.sensor].label} ${item.focal}mm`, coodX + 5, coodY - 5);
+                    }
                 });
                 ctx.save();
                 ctx.restore();
@@ -627,7 +635,7 @@
                 elements.addToCompareBtn.addEventListener('click', () => {
                     const sensor = state.sensor;
                     const focal = state.focal;
-                    state.compareList.push(`${sensor}/${focal}`);
+                    state.compareList.push(`${sensor}/${focal.toFixed(0)}`);
                     state.compareList = [...new Set(state.compareList)]; // 去重
                     elements.compareList.value = state.compareList.join(',');
                     updateUI();
