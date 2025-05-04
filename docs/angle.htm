@@ -59,17 +59,19 @@
                 <option value="1in4">【3.60 mm x 2.70 mm】 1/4″ (4:3)</option>
                 <option value="1in5">【2.88 mm x 2.16 mm】 1/5″ (4:3)</option>
             </select>
-            <span data-title="CMOS sensor size does not refer to diagonal line but to the size of vacuum camera tubes, which is why a '1-inch' sensor actually measures 12.8 mm x 9.6 mm, with a diagonal of 0.63'' (16mm), not corresponding to the traditional meaning of a 1-inch sensor.">[?]</span>
+            <span data-title="CMOS sensor size does not refer to diagonal line but to the size of vacuum camera tubes, which is why a '1-inch' sensor actually measures 12.8 mm x 9.6 mm, with a diagonal of 0.63'' (16mm), not corresponding to the traditional meaning of a 1-inch sensor.">
+                ℹ️
+            </span>
         </div>
         <div class="control-group">
-            <label>Focus Length：</label>
+            <label>Focal Length：</label>
             <input type="number" id="focalLength" min="1" max="20000" value="50" step="1">
             <span>mm</span>
-            <button id="addToCompareBtn">Add to Compare List</button>
-            <button onclick="document.getElementById('compareList').value='';state.compareList=[];updateUI();">Clear Compare List</button>
+            <button id="addToCompareBtn">Add to Compare</button>
+            <button onclick="document.getElementById('compareList').value='';state.compareList=[];updateUI();">Clear List</button>
         </div>
         <div class="control-group">
-            <label>35mm Equivalent Focal Length：</label>
+            <label>35mm Equivalent：</label>
             <span id="focalLengthRemark"></span>
         </div>
         <div class="control-group">
@@ -91,12 +93,12 @@
             </div>
         </div>
         <div class="control-group">
-            <label>Compare Viewport List：</label>
+            <label>FOV Comparison：</label>
             <input type="text" id="compareList" placeholder="FF/50,FF/85,APSC_S/35" value="FF/35,FF/50" style="width: 300px;">
             <button onclick="reset()">Reset</button>
         </div>
         <div class="control-group">
-            <label>Compare Viewport Position:</label>
+            <label>Viewport Alignment:</label>
             <div class="radio-group">
                 <label class="radio-label">
                     <input type="radio" name="positionType" value="center-center" checked> Center Center
@@ -113,9 +115,9 @@
             </div>
         </div>
         <div class="control-group">
-            <label>Compare Viewport Reference Image:</label>
+            <label>Reference Image:</label>
             <input type="file" id="compareImage" accept="image/*" style="width: 100px;">
-            <button id="uploadBtn">Upload</button>
+            <button id="uploadBtn">Apply</button>
             <button id="clearBtn">Clear</button>
         </div>
     </div>
