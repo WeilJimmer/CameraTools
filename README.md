@@ -8,7 +8,7 @@ Live Demo (線上使用) :
 
 [Get Started with the online free Calculator →](https://lens-angle.weil.app.wbftw.org/angle.htm)
 
-[More detail in Wiki →](wiki)
+[More detail in Wiki →](https://github.com/WeilJimmer/LensAngleViewCalculator/wiki)
 
 ## Feature
 
