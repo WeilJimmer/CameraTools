@@ -2,21 +2,150 @@
 <html>
 <head>
     <title>Lens Angle of View Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-        .controls { margin-bottom: 20px; }
-        .control-group { display: flex; gap: 10px; align-items: center; }
-        canvas { border: 1px solid #ccc; cursor: move; }
-        input[type="number"] { width: 100px; }
-        .radio-group { display: flex; gap: 15px; }
-        .radio-label { display: flex; align-items: center; gap: 5px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif; 
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .left-panel {
+            width: 40%;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        .right-panel {
+            width: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            cursor: move;
+            max-width: 95%;
+            max-height: 95%;
+        }
+
+        input[type="number"] {
+            width: 100px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        label {
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        select, input[type="text"] {
+            min-width: 200px;
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .layout-indicator {
+            position: fixed;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+
+        @media screen and (max-width: 500px) {
+            body {
+                flex-direction: column !important;
+                height: auto !important;
+                min-height: 100vh !important;
+                overflow-y: auto !important;
+            }
+
+            .left-panel {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                border-right: none !important;
+                border-bottom: 1px solid #ddd !important;
+                order: 1 !important;
+            }
+
+            .right-panel {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 700px !important;
+                min-height: 700px !important;
+                order: 2 !important;
+            }
+
+            .control-group {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+
+            label {
+                margin-bottom: 5px !important;
+            }
+
+            select, input[type="text"] {
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+        }
     </style>
 </head>
 <body>
+<div class="left-panel">
+    <h2>Lens FOV Calculator</h2>
     <div class="controls">
         <div class="control-group">
             <label>CMOS：</label>
-            <select id="sensorSize" style="width: 300px;">
+            <select id="sensorSize">
                 <option value="MF_H">【53.40 mm x 40.00 mm】 Medium Format (Hasselblad H6D-100c) (4:3)</option>
                 <option value="MF_PH">【44.00 mm x 33.00 mm】 Medium Format (Phase One, Hasselblad X1D) (4:3)</option>
                 <option value="MF_GFX">【43.80 mm x 32.90 mm】 Medium Format (Fujifilm GFX) (4:3)</option>
@@ -75,7 +204,7 @@
             <span id="focalLengthRemark"></span>
         </div>
         <div class="control-group">
-            <label>Angle of View (Field of View)：</label>
+            <label>Angle of View：</label>
             <span id="angleDisplay">0</span>°
         </div>
         <div class="control-group">
@@ -94,7 +223,7 @@
         </div>
         <div class="control-group">
             <label>FOV Comparison：</label>
-            <input type="text" id="compareList" placeholder="FF/50,FF/85,APSC_S/35" value="FF/35,FF/50" style="width: 300px;">
+            <input type="text" id="compareList" placeholder="FF/50,FF/85,APSC_S/35" value="FF/35,FF/50">
             <button onclick="reset()">Reset</button>
         </div>
         <div class="control-group">
@@ -116,14 +245,226 @@
         </div>
         <div class="control-group">
             <label>Reference Image:</label>
-            <input type="file" id="compareImage" accept="image/*" style="width: 100px;">
+            <input type="file" id="compareImage" accept="image/*">
             <button id="uploadBtn">Apply</button>
             <button id="clearBtn">Clear</button>
         </div>
+        <div class="control-group">
+            <label>Reference Image Opacity:</label>
+            <input type="number" id="compareImageAlpha" min="1" max="100" value="60" step="1">
+            <span>%</span>
+            <input type="range" id="compareImageAlphaRange" min="1" max="100" value="60" step="1">
+        </div>
+        <br><br>
+        <h2>Object Calculator (Experimental)</h2>
+        <div class="control-group">
+            <label>Reference Object:</label>
+            <input type="checkbox" id="drawObjectChecked"> Draw Cuboid
+        </div>
+        <div class="control-group">
+            <label>Object Width:</label>
+            <input type="number" id="cuboidWidth" min="1" max="10000000" value="50" step="1">
+            <select id="cuboidWidthUnit" style="min-width: 40px;">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="km">km</option>
+                <option value="inch">inch</option>
+                <option value="ft">ft</option>
+                <option value="yd">yd</option>
+                <option value="mile">mile</option>
+            </select>
+            <input type="range" id="cuboidWidthRange" min="1" max="100" value="50" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Height:</label>
+            <input type="number" id="cuboidHeight" min="1" max="10000000" value="50" step="1">
+            <select id="cuboidHeightUnit" style="min-width: 40px;">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="km">km</option>
+                <option value="inch">inch</option>
+                <option value="ft">ft</option>
+                <option value="yd">yd</option>
+                <option value="mile">mile</option>
+            </select>
+            <input type="range" id="cuboidHeightRange" min="1" max="100" value="50" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Depth:</label>
+            <input type="number" id="cuboidDepth" min="1" max="10000000" value="50" step="1">
+            <select id="cuboidDepthUnit" style="min-width: 40px;">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="km">km</option>
+                <option value="inch">inch</option>
+                <option value="ft">ft</option>
+                <option value="yd">yd</option>
+                <option value="mile">mile</option>
+            </select>
+            <input type="range" id="cuboidDepthRange" min="1" max="100" value="50" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object X Position (Horizontal):</label>
+            <input type="number" id="cuboidX" min="-10000000" max="10000000" value="0" step="1">
+            <select id="cuboidXUnit" style="min-width: 40px;">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="km">km</option>
+                <option value="inch">inch</option>
+                <option value="ft">ft</option>
+                <option value="yd">yd</option>
+                <option value="mile">mile</option>
+            </select>
+            <input type="range" id="cuboidXRange" min="-100" max="100" value="0" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Y Position (Vertical):</label>
+            <input type="number" id="cuboidY" min="-10000000" max="10000000" value="0" step="1">
+            <select id="cuboidYUnit" style="min-width: 40px;">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="km">km</option>
+                <option value="inch">inch</option>
+                <option value="ft">ft</option>
+                <option value="yd">yd</option>
+                <option value="mile">mile</option>
+            </select>
+            <input type="range" id="cuboidYRange" min="-100" max="100" value="0" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Z Position (Distance):</label>
+            <input type="number" id="cuboidZ" min="-10000000" max="10000000" value="1000" step="1">
+            <select id="cuboidZUnit" style="min-width: 40px;">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="km">km</option>
+                <option value="inch">inch</option>
+                <option value="ft">ft</option>
+                <option value="yd">yd</option>
+                <option value="mile">mile</option>
+            </select>
+            <input type="range" id="cuboidZRange" min="-100" max="100" value="1000" step="1">
+        </div>
     </div>
+</div>
+<div class="right-panel">
     <canvas id="canvas"></canvas>
+</div>
     <script>
-        // 常量和配置
+        class Cuboid {
+            w = 50;
+            h = 50;
+            d = 50;
+            x = 0;
+            y = 0;
+            z = 1000;
+            points = [];
+            angles = [];
+            planes = [];
+            constructor(w=50, h=50, d=50, x=0, y=0, z=1000) {
+                this.w = w;
+                this.h = h;
+                this.d = d;
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+            static getColorByDistance(index) {
+                const colors = [80, 75, 65, 50, 45]
+                return `hsl(0, 0%, ${colors[index]}%)`;
+            }
+            static getPlaneDistance(x, y, z) {
+                return Math.sqrt(x ** 2 + y ** 2 + z ** 2);
+            }
+            static getTransformedPos(a, d){
+                return Math.tan(verticalAngle * Math.PI / 360) * viewDistance * 2;
+            }
+            static getTransformedPoint(angles, distance) {
+                let transformedPoints = angles.map(angle => {
+                    let x = Math.tan(Math.abs(angle.h) * Math.PI / 360) * distance * (angle.h > 0 ? 1 : -1)
+                    let y = Math.tan(Math.abs(angle.v) * Math.PI / 360) * distance * (angle.v > 0 ? 1 : -1);
+                    return { x, y };
+                });
+                return transformedPoints;
+            }
+            static getAngleByDistance(x, y, distance, angleType='horizontal') {
+                let size = Math.sqrt(x ** 2 + y ** 2);
+                let direction = 1;
+                if (angleType == 'horizontal') {
+                    size = Math.abs(x);
+                    direction = x < 0 ? -1 : 1;
+                } else if (angleType == 'vertical') {
+                    size = Math.abs(y);
+                    direction = y < 0 ? -1 : 1;
+                }
+                return direction * 2 * Math.atan(size / (distance)) * 180 / Math.PI;
+            }
+            calculate(){
+                this.generatePoints();
+                this.generateAngles();
+                return this;
+            }
+            generatePoints() {
+                this.points = [
+                    {x: this.x + this.w/2, y: this.y + this.h/2, z: this.z}, // right-bottom
+                    {x: this.x - this.w/2, y: this.y + this.h/2, z: this.z}, // left-bottom
+                    {x: this.x - this.w/2, y: this.y - this.h/2, z: this.z}, // left-top
+                    {x: this.x + this.w/2, y: this.y - this.h/2, z: this.z}, // right-top
+                    {x: this.x + this.w/2, y: this.y + this.h/2, z: this.z + this.d}, // right-bottom far
+                    {x: this.x - this.w/2, y: this.y + this.h/2, z: this.z + this.d}, // left-bottom far
+                    {x: this.x - this.w/2, y: this.y - this.h/2, z: this.z + this.d}, // left-top far
+                    {x: this.x + this.w/2, y: this.y - this.h/2, z: this.z + this.d} // right-top far
+                ];
+                this.planes = [
+                    { d: Cuboid.getPlaneDistance(this.x, this.y, this.z) }, // front
+                    { d: Cuboid.getPlaneDistance(this.x - this.w/2, this.y, this.z + this.d/2) }, // left
+                    { d: Cuboid.getPlaneDistance(this.x, this.y - this.h/2, this.z + this.d/2) }, // top
+                    { d: Cuboid.getPlaneDistance(this.x + this.w/2, this.y, this.z + this.d/2) }, // right
+                    { d: Cuboid.getPlaneDistance(this.x, this.y + this.h/2, this.z + this.d/2) },  // bottom
+                    { d: Cuboid.getPlaneDistance(this.x, this.y, this.z + this.d) }, // back
+                ];
+            }
+            generateAngles() {
+                const left_front_ha = Cuboid.getAngleByDistance(this.x - this.w/2, 0, this.z, 'horizontal'); // left-front side horizontal angle
+                const right_front_ha = Cuboid.getAngleByDistance(this.x + this.w/2, 0, this.z, 'horizontal'); // right-front side horizontal angle
+                const top_front_va = Cuboid.getAngleByDistance(0, this.y - this.h/2, this.z, 'vertical'); // top-front side vertical angle
+                const bottom_front_va = Cuboid.getAngleByDistance(0, this.y + this.h/2, this.z, 'vertical'); // bottom-front side vertical angle
+                const left_rear_ha = Cuboid.getAngleByDistance(this.x - this.w/2, 0, this.z + this.d, 'horizontal'); // left-rear side horizontal angle
+                const right_rear_ha = Cuboid.getAngleByDistance(this.x + this.w/2, 0, this.z + this.d, 'horizontal'); // right-rear side horizontal angle
+                const top_rear_va = Cuboid.getAngleByDistance(0, this.y - this.h/2, this.z + this.d, 'vertical'); // top-rear side vertical angle
+                const bottom_rear_va = Cuboid.getAngleByDistance(0, this.y + this.h/2, this.z + this.d, 'vertical'); // bottom-rear side vertical angle
+                this.angles = [
+                    { h: right_front_ha, v: bottom_front_va }, // right-bottom front [0]
+                    { h: left_front_ha, v: bottom_front_va }, // left-bottom front [1]
+                    { h: left_front_ha, v: top_front_va }, // left-top front [2]
+                    { h: right_front_ha, v: top_front_va }, // right-top front [3]
+                    { h: right_rear_ha, v: bottom_rear_va }, // right-bottom rear [4]
+                    { h: left_rear_ha, v: bottom_rear_va }, // left-bottom rear [5]
+                    { h: left_rear_ha, v: top_rear_va }, // left-top rear [6]
+                    { h: right_rear_ha, v: top_rear_va } // right-top rear [7]
+                ];
+            }
+            generate2DCuboid(distance) {
+                const tps = Cuboid.getTransformedPoint(this.angles, distance);
+                let planes2d = [
+                    { d: this.planes[0].d, points: [tps[0], tps[1], tps[2], tps[3]], color: Cuboid.getColorByDistance(0) }, // front
+                    { d: this.planes[1].d, points: [tps[1], tps[5], tps[6], tps[2]], color: Cuboid.getColorByDistance(2) }, // left
+                    { d: this.planes[2].d, points: [tps[2], tps[3], tps[7], tps[6]], color: Cuboid.getColorByDistance(1) }, // top
+                    { d: this.planes[3].d, points: [tps[3], tps[0], tps[4], tps[7]], color: Cuboid.getColorByDistance(2) }, // right
+                    { d: this.planes[4].d, points: [tps[4], tps[5], tps[1], tps[0]], color: Cuboid.getColorByDistance(3) }, // bottom
+                    { d: this.planes[5].d, points: [tps[4], tps[5], tps[6], tps[7]], color: Cuboid.getColorByDistance(4) } // back
+                ]
+                //sort by distance descending
+                planes2d.sort((a, b) => b.d - a.d);
+                return planes2d;
+            }
+        }
         const CONFIG = {
             SENSOR_TYPES: {
                 MF_H: { width: 53.4, height: 40, label: 'Medium Format (4:3) Hasselblad H6D-100c', ratio: '4:3' },
@@ -194,6 +535,17 @@
             ],
             referenceImage: null,
             drawImage: true,
+            imageAlpha: 0.6,
+            drawObject: false,
+            cuboid: (new Cuboid(50, 50, 50)).calculate(),
+            units: {
+                cuboidWidth: 'mm',
+                cuboidHeight: 'mm',
+                cuboidDepth: 'mm',
+                cuboidX: 'mm',
+                cuboidY: 'mm',
+                cuboidZ: 'mm'
+            },
         };
 
         // DOM 元素
@@ -207,15 +559,35 @@
             positionTypes: document.getElementsByName('positionType'),
             compareList: document.getElementById('compareList'),
             compareImage: document.getElementById('compareImage'),
+            compareImageAlpha: document.getElementById('compareImageAlpha'),
+            compareImageAlphaRange: document.getElementById('compareImageAlphaRange'),
             addToCompareBtn: document.getElementById('addToCompareBtn'),
             uploadBtn: document.getElementById('uploadBtn'),
             clearBtn: document.getElementById('clearBtn'),
+            drawObjectChecked: document.getElementById('drawObjectChecked'),
+            cuboidWidth: document.getElementById('cuboidWidth'),
+            cuboidWidthUnit: document.getElementById('cuboidWidthUnit'),
+            cuboidWidthRange: document.getElementById('cuboidWidthRange'),
+            cuboidHeight: document.getElementById('cuboidHeight'),
+            cuboidHeightUnit: document.getElementById('cuboidHeightUnit'),
+            cuboidHeightRange: document.getElementById('cuboidHeightRange'),
+            cuboidDepth: document.getElementById('cuboidDepth'),
+            cuboidDepthUnit: document.getElementById('cuboidDepthUnit'),
+            cuboidDepthRange: document.getElementById('cuboidDepthRange'),
+            cuboidX: document.getElementById('cuboidX'),
+            cuboidXUnit: document.getElementById('cuboidXUnit'),
+            cuboidXRange: document.getElementById('cuboidXRange'),
+            cuboidY: document.getElementById('cuboidY'),
+            cuboidYUnit: document.getElementById('cuboidYUnit'),
+            cuboidYRange: document.getElementById('cuboidYRange'),
+            cuboidZ: document.getElementById('cuboidZ'),
+            cuboidZUnit: document.getElementById('cuboidZUnit'),
+            cuboidZRange: document.getElementById('cuboidZRange'),
         };
         const ctx = elements.canvas.getContext('2d');
 
         // 核心計算模組
         const calculator = {
-            // 計算鏡頭視角
             getAngle(sensorType='FF', angleType='diagonal', focal=50) {
                 const sensor = CONFIG.SENSOR_TYPES[sensorType];
                 const size = {
@@ -269,7 +641,21 @@
                 const viewY = this.canvasToView(0, canvasY).y;
                 const base = this.getBasePosition();
                 return (base.y + 100 - viewY) / 2;
-            }
+            },
+
+            getUnitFactor(unit) {
+                switch (unit) {
+                    case 'mm': return 1;
+                    case 'cm': return 10;
+                    case 'm': return 1000;
+                    case 'km': return 1000000;
+                    case 'inch': return 25.4;
+                    case 'ft': return 304.8;
+                    case 'yd': return 914.4;
+                    case 'mile': return 1609344;
+                    default: return 1; // mm
+                }
+            },
         };
 
         // 繪圖模組
@@ -428,6 +814,23 @@
                     centerY += rects[0].height/2;
                 }
                 ctx.translate(centerX, centerY);
+                if (state.drawObject) {
+                    // drawing cuboid
+                    const cuboid_planes = state.cuboid.calculate().generate2DCuboid(viewDistance);
+                    cuboid_planes.forEach((plane, index) => {
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#444';
+                        ctx.lineWidth = 0.2;
+                        ctx.fillStyle = plane.color;
+                        ctx.moveTo(plane.points[0].x, plane.points[0].y);
+                        for (let i = 1; i < plane.points.length; i++) {
+                            ctx.lineTo(plane.points[i].x, plane.points[i].y);
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    });
+                }
                 rects.forEach((item, index) => {
                     let coodX = -item.width / 2;
                     let coodY = -item.height / 2;
@@ -442,7 +845,9 @@
                         coodY = -item.height;
                     }
                     if (index == 0 && state.drawImage && state.referenceImage) {
+                        ctx.globalAlpha = state.imageAlpha;
                         ctx.drawImage(state.referenceImage, coodX, coodY, item.width, item.height);
+                        ctx.globalAlpha = 1.0;
                     }
                     ctx.strokeStyle = colors[index % colors.length];
                     ctx.lineWidth = lineWidth;
@@ -567,8 +972,12 @@
         function initialize() {
             // 設置畫布大小
             function resizeCanvas() {
-                elements.canvas.width = window.innerWidth - 40;
-                elements.canvas.height = window.innerHeight - 200;
+                const rightPanel = document.querySelector('.right-panel');
+                const padding = 20;
+                const availableWidth = rightPanel.clientWidth - (padding * 2);
+                const availableHeight = rightPanel.clientHeight - (padding * 2);
+                elements.canvas.width = availableWidth;
+                elements.canvas.height = availableHeight;
             }
 
             // 添加事件監聽器
@@ -622,6 +1031,18 @@
                     }
                 });
 
+                elements.compareImageAlpha.addEventListener('input', e => {
+                    state.imageAlpha = Math.max(1, Number(e.target.value)) * 0.01;
+                    elements.compareImageAlphaRange.value = e.target.value;
+                    render();
+                });
+
+                elements.compareImageAlphaRange.addEventListener('input', e => {
+                    state.imageAlpha = Math.max(1, Number(e.target.value)) * 0.01;
+                    elements.compareImageAlpha.value = e.target.value;
+                    render();
+                });
+
                 elements.uploadBtn.addEventListener('click', () => {
                     if (state.referenceImage) {
                         state.drawImage = true;
@@ -640,6 +1061,119 @@
                     state.compareList.push(`${sensor}/${focal.toFixed(0)}`);
                     state.compareList = [...new Set(state.compareList)]; // 去重
                     elements.compareList.value = state.compareList.join(',');
+                    updateUI();
+                });
+
+                elements.drawObjectChecked.addEventListener('change', e => {
+                    state.drawObject = e.target.checked;
+                    render();
+                });
+
+                elements.cuboidWidth.addEventListener('input', e => {
+                    state.cuboid.w = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidWidthUnit);
+                    updateUI();
+                });
+
+                elements.cuboidWidthRange.addEventListener('input', e => {
+                    state.cuboid.w = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidWidthUnit);
+                    elements.cuboidWidth.value = state.cuboid.w / calculator.getUnitFactor(state.units.cuboidWidthUnit);
+                    updateUI();
+                });
+
+                elements.cuboidWidthUnit.addEventListener('change', e => {
+                    state.units.cuboidWidthUnit = e.target.value;
+                    state.cuboid.w = Math.max(1, Number(elements.cuboidWidth.value)) * calculator.getUnitFactor(state.units.cuboidWidthUnit);
+                    elements.cuboidWidthRange.value = state.cuboid.w / calculator.getUnitFactor(state.units.cuboidWidthUnit);
+                    updateUI();
+                });
+
+                elements.cuboidHeight.addEventListener('input', e => {
+                    state.cuboid.h = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidHeightUnit);
+                    updateUI();
+                });
+
+                elements.cuboidHeightRange.addEventListener('input', e => {
+                    state.cuboid.h = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidHeightUnit);
+                    elements.cuboidHeight.value = state.cuboid.h / calculator.getUnitFactor(state.units.cuboidHeightUnit);
+                    updateUI();
+                });
+
+                elements.cuboidHeightUnit.addEventListener('change', e => {
+                    state.units.cuboidHeightUnit = e.target.value;
+                    state.cuboid.h = Math.max(1, Number(elements.cuboidHeight.value)) * calculator.getUnitFactor(state.units.cuboidHeightUnit);
+                    elements.cuboidHeightRange.value = state.cuboid.h / calculator.getUnitFactor(state.units.cuboidHeightUnit);
+                    updateUI();
+                });
+
+                elements.cuboidDepth.addEventListener('input', e => {
+                    state.cuboid.d = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidDepthUnit);
+                    updateUI();
+                });
+
+                elements.cuboidDepthRange.addEventListener('input', e => {
+                    state.cuboid.d = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidDepthUnit);
+                    elements.cuboidDepth.value = state.cuboid.d / calculator.getUnitFactor(state.units.cuboidDepthUnit);
+                    updateUI();
+                });
+
+                elements.cuboidDepthUnit.addEventListener('change', e => {
+                    state.units.cuboidDepthUnit = e.target.value;
+                    state.cuboid.d = Math.max(0, Number(elements.cuboidDepth.value)) * calculator.getUnitFactor(state.units.cuboidDepthUnit);
+                    elements.cuboidDepthRange.value = state.cuboid.d / calculator.getUnitFactor(state.units.cuboidDepthUnit);
+                    updateUI();
+                });
+
+                elements.cuboidX.addEventListener('input', e => {
+                    state.cuboid.x = Number(e.target.value) * calculator.getUnitFactor(state.units.cuboidXUnit);
+                    updateUI();
+                });
+
+                elements.cuboidXRange.addEventListener('input', e => {
+                    state.cuboid.x = Number(e.target.value) * calculator.getUnitFactor(state.units.cuboidXUnit);
+                    elements.cuboidX.value = state.cuboid.x / calculator.getUnitFactor(state.units.cuboidXUnit);
+                    updateUI();
+                });
+
+                elements.cuboidXUnit.addEventListener('change', e => {
+                    state.units.cuboidXUnit = e.target.value;
+                    state.cuboid.x = Number(e.target.value) * calculator.getUnitFactor(state.units.cuboidXUnit);
+                    elements.cuboidXRange.value = state.cuboid.x / calculator.getUnitFactor(state.units.cuboidXUnit);
+                    updateUI();
+                });
+
+                elements.cuboidY.addEventListener('input', e => {
+                    state.cuboid.y = Number(e.target.value) * calculator.getUnitFactor(state.units.cuboidYUnit);
+                    updateUI();
+                });
+
+                elements.cuboidYRange.addEventListener('input', e => {
+                    state.cuboid.y = Number(e.target.value) * calculator.getUnitFactor(state.units.cuboidYUnit);
+                    elements.cuboidY.value = state.cuboid.y / calculator.getUnitFactor(state.units.cuboidYUnit);
+                    updateUI();
+                });
+
+                elements.cuboidYUnit.addEventListener('change', e => {
+                    state.units.cuboidYUnit = e.target.value;
+                    state.cuboid.y = Number(e.target.value) * calculator.getUnitFactor(state.units.cuboidYUnit);
+                    elements.cuboidYRange.value = state.cuboid.y / calculator.getUnitFactor(state.units.cuboidYUnit);
+                    updateUI();
+                });
+
+                elements.cuboidZ.addEventListener('input', e => {
+                    state.cuboid.z = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidZUnit);
+                    updateUI();
+                });
+
+                elements.cuboidZRange.addEventListener('input', e => {
+                    state.cuboid.z = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidZUnit);
+                    elements.cuboidZ.value = state.cuboid.z / calculator.getUnitFactor(state.units.cuboidZUnit);
+                    updateUI();
+                });
+
+                elements.cuboidZUnit.addEventListener('change', e => {
+                    state.units.cuboidZUnit = e.target.value;
+                    state.cuboid.z = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidZUnit);
+                    elements.cuboidZRange.value = state.cuboid.z / calculator.getUnitFactor(state.units.cuboidZUnit);
                     updateUI();
                 });
 
