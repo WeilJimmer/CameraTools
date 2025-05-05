@@ -908,6 +908,19 @@
             updateUI();
         }
 
+        function getTouchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function getTouchMidpoint(touches) {
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
+        }
+
         // 事件處理模組
         const eventHandlers = {
             mousedown(e) {
@@ -965,6 +978,83 @@
 
                 state.scale = newScale;
                 render();
+            },
+
+            touchstart(e) {
+                e.preventDefault();
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const rect = elements.canvas.getBoundingClientRect();
+                    const canvasX = touch.clientX - rect.left;
+                    const canvasY = touch.clientY - rect.top;
+
+                    state.drag.active = true;
+                    state.drag.focal = calculator.isOnFocalPoint(canvasX, canvasY);
+                    state.drag.last = { x: touch.clientX, y: touch.clientY };
+
+                    state.touch = {
+                        singleTouch: true,
+                        startX: touch.clientX,
+                        startY: touch.clientY
+                    };
+                } else if (e.touches.length === 2) {
+                    state.touch = {
+                        singleTouch: false,
+                        initialDistance: getTouchDistance(e.touches),
+                        initialScale: state.scale,
+                        midpoint: getTouchMidpoint(e.touches)
+                    };
+                }
+            },
+
+            touchmove(e) {
+                e.preventDefault();
+                if (e.touches.length === 1 && state.drag.active) {
+                    const touch = e.touches[0];
+                    if (state.drag.focal) {
+                        const rect = elements.canvas.getBoundingClientRect();
+                        const canvasY = touch.clientY - rect.top;
+                        const newFocal = calculator.calculateFocal(canvasY);
+                        state.focal = Math.max(CONFIG.MIN_FOCAL, Math.min(CONFIG.MAX_FOCAL, newFocal));
+                        elements.focal.value = Math.round(state.focal);
+                    } else {
+                        const dx = touch.clientX - state.drag.last.x;
+                        const dy = touch.clientY - state.drag.last.y;
+                        state.offset.x += dx;
+                        state.offset.y += dy;
+                        state.drag.last = { x: touch.clientX, y: touch.clientY };
+                    }
+                    updateUI();
+                } else if (e.touches.length === 2 && state.touch && !state.touch.singleTouch) {
+                    const currentDistance = getTouchDistance(e.touches);
+                    const midpoint = getTouchMidpoint(e.touches);
+                    const scaleFactor = currentDistance / state.touch.initialDistance;
+                    const newScale = Math.max(CONFIG.MIN_SCALE, Math.min(CONFIG.MAX_SCALE, state.touch.initialScale * scaleFactor));
+
+                    const viewX = (state.touch.midpoint.x - state.offset.x) / state.scale;
+                    const viewY = (state.touch.midpoint.y - state.offset.y) / state.scale;
+
+                    state.offset.x = midpoint.x - viewX * newScale;
+                    state.offset.y = midpoint.y - viewY * newScale;
+                    state.scale = newScale;
+                    render();
+                }
+            },
+
+            touchend(e) {
+                if (e.touches.length === 0) {
+                    state.drag.active = false;
+                    state.drag.focal = false;
+                    state.touch = null;
+                } else if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    state.drag.last = { x: touch.clientX, y: touch.clientY };
+                    state.touch = {
+                        singleTouch: true,
+                        startX: touch.clientX,
+                        startY: touch.clientY
+                    };
+                }
             }
         };
 
@@ -987,6 +1077,11 @@
                 elements.canvas.addEventListener('mouseup', eventHandlers.mouseup);
                 elements.canvas.addEventListener('mouseleave', eventHandlers.mouseup);
                 elements.canvas.addEventListener('wheel', eventHandlers.wheel);
+
+                elements.canvas.addEventListener('touchstart', eventHandlers.touchstart, { passive: false });
+                elements.canvas.addEventListener('touchmove', eventHandlers.touchmove, { passive: false });
+                elements.canvas.addEventListener('touchend', eventHandlers.touchend);
+                elements.canvas.addEventListener('touchcancel', eventHandlers.touchend);
 
                 elements.sensor.addEventListener('change', e => {
                     state.sensor = e.target.value;
