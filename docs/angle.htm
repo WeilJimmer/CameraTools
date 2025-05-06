@@ -338,10 +338,10 @@
         </div>
         <div class="control-group">
             <label>Object Z Position (Distance):</label>
-            <input type="number" id="cuboidZ" min="-10000000" max="10000000" value="1000" step="1">
+            <input type="number" id="cuboidZ" min="1" max="10000000" value="50" step="1">
             <select id="cuboidZUnit" style="min-width: 40px;">
                 <option value="mm">mm</option>
-                <option value="cm">cm</option>
+                <option value="cm" selected="selected">cm</option>
                 <option value="m">m</option>
                 <option value="km">km</option>
                 <option value="inch">inch</option>
@@ -349,7 +349,25 @@
                 <option value="yd">yd</option>
                 <option value="mile">mile</option>
             </select>
-            <input type="range" id="cuboidZRange" min="-100" max="100" value="1000" step="1">
+            <input type="range" id="cuboidZRange" min="1" max="100" value="50" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Roll (X axis):</label>
+            <input type="number" id="cuboidRoll" min="-360" max="360" value="0" step="1">
+            <span>°</span>
+            <input type="range" id="cuboidRollRange" min="-360" max="360" value="0" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Pitch (Y axis):</label>
+            <input type="number" id="cuboidPitch" min="-360" max="360" value="0" step="1">
+            <span>°</span>
+            <input type="range" id="cuboidPitchRange" min="-360" max="360" value="0" step="1">
+        </div>
+        <div class="control-group">
+            <label>Object Yaw (Z axis):</label>
+            <input type="number" id="cuboidYaw" min="-360" max="360" value="0" step="1">
+            <span>°</span>
+            <input type="range" id="cuboidYawRange" min="-360" max="360" value="0" step="1">
         </div>
     </div>
 </div>
@@ -357,23 +375,109 @@
     <canvas id="canvas"></canvas>
 </div>
     <script>
+        class Matrix4x4 {
+            constructor() {
+                this.data = [
+                    1, 0, 0, 0,  // [0] [1] [2] [3]
+                    0, 1, 0, 0,  // [4] [5] [6] [7]
+                    0, 0, 1, 0,  // [8] [9] [10] [11]
+                    0, 0, 0, 1,  // [12] [13] [14] [15]
+                ];
+            }
+            multiply(m) {
+                const result = new Matrix4x4();
+                const a = this.data;
+                const b = m.data;
+                const c = result.data;
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        c[i*4+j] = 0;
+                        for (let k = 0; k < 4; k++) {
+                            c[i*4+j] += a[i*4+k] * b[k*4+j];
+                        }
+                    }
+                }
+                return result;
+            }
+            static translation(x, y, z) {
+                const m = new Matrix4x4();
+                m.data[12] = x;
+                m.data[13] = y;
+                m.data[14] = z;
+                return m;
+            }
+            static rotationX(angle) {
+                const m = new Matrix4x4();
+                const c = Math.cos(angle);
+                const s = Math.sin(angle);
+                m.data[5] = c;
+                m.data[6] = s;
+                m.data[9] = -s;
+                m.data[10] = c;
+                return m;
+            }
+            static rotationY(angle) {
+                const m = new Matrix4x4();
+                const c = Math.cos(angle);
+                const s = Math.sin(angle);
+                m.data[0] = c;
+                m.data[2] = -s;
+                m.data[8] = s;
+                m.data[10] = c;
+                return m;
+            }
+            static rotationZ(angle) {
+                const m = new Matrix4x4();
+                const c = Math.cos(angle);
+                const s = Math.sin(angle);
+                m.data[0] = c;
+                m.data[1] = s;
+                m.data[4] = -s;
+                m.data[5] = c;
+                return m;
+            }
+            transformPoint(point) {
+                const m = this.data;
+                const x = point.x;
+                const y = point.y;
+                const z = point.z;
+                const w = point.w || 1;
+                const nx = m[0]*x + m[4]*y + m[8]*z + m[12]*w;
+                const ny = m[1]*x + m[5]*y + m[9]*z + m[13]*w;
+                const nz = m[2]*x + m[6]*y + m[10]*z + m[14]*w;
+                const nw = m[3]*x + m[7]*y + m[11]*z + m[15]*w;
+                return {
+                    x: nx / nw,
+                    y: ny / nw,
+                    z: nz / nw,
+                    w: nw
+                };
+            }
+        }
         class Cuboid {
             w = 50;
             h = 50;
             d = 50;
             x = 0;
             y = 0;
-            z = 1000;
+            z = 500;
+            rx = 0;
+            ry = 0;
+            rz = 0;
             points = [];
+            points_fc = []; // face center
             angles = [];
             planes = [];
-            constructor(w=50, h=50, d=50, x=0, y=0, z=1000) {
+            constructor(w=50, h=50, d=50, x=0, y=0, z=500, rx=0, ry=0, rz=0) {
                 this.w = w;
                 this.h = h;
                 this.d = d;
                 this.x = x;
                 this.y = y;
                 this.z = z;
+                this.rx = rx;
+                this.ry = ry;
+                this.rz = rz;
             }
             static getColorByDistance(index) {
                 const colors = [80, 75, 65, 50, 45]
@@ -406,49 +510,70 @@
                 return direction * 2 * Math.atan(size / (distance)) * 180 / Math.PI;
             }
             calculate(){
-                this.generatePoints();
+                this.generatePoints(this.w, this.h, this.d);
+                this.applyRotate(this.rx, this.ry, this.rz);
+                this.applyTranslate(this.x, this.y, this.z);
+                this.generatePlanes();
                 this.generateAngles();
                 return this;
             }
-            generatePoints() {
+            generatePoints(w=50, h=50, d=50) {
                 this.points = [
-                    {x: this.x + this.w/2, y: this.y + this.h/2, z: this.z}, // right-bottom
-                    {x: this.x - this.w/2, y: this.y + this.h/2, z: this.z}, // left-bottom
-                    {x: this.x - this.w/2, y: this.y - this.h/2, z: this.z}, // left-top
-                    {x: this.x + this.w/2, y: this.y - this.h/2, z: this.z}, // right-top
-                    {x: this.x + this.w/2, y: this.y + this.h/2, z: this.z + this.d}, // right-bottom far
-                    {x: this.x - this.w/2, y: this.y + this.h/2, z: this.z + this.d}, // left-bottom far
-                    {x: this.x - this.w/2, y: this.y - this.h/2, z: this.z + this.d}, // left-top far
-                    {x: this.x + this.w/2, y: this.y - this.h/2, z: this.z + this.d} // right-top far
+                    {x:   w/2, y:   h/2, z: -d/2}, // right-bottom
+                    {x: - w/2, y:   h/2, z: -d/2}, // left-bottom
+                    {x: - w/2, y: - h/2, z: -d/2}, // left-top
+                    {x:   w/2, y: - h/2, z: -d/2}, // right-top
+                    {x:   w/2, y:   h/2, z:  d/2}, // right-bottom far
+                    {x: - w/2, y:   h/2, z:  d/2}, // left-bottom far
+                    {x: - w/2, y: - h/2, z:  d/2}, // left-top far
+                    {x:   w/2, y: - h/2, z:  d/2}  // right-top far
                 ];
-                this.planes = [
-                    { d: Cuboid.getPlaneDistance(this.x, this.y, this.z) }, // front
-                    { d: Cuboid.getPlaneDistance(this.x - this.w/2, this.y, this.z + this.d/2) }, // left
-                    { d: Cuboid.getPlaneDistance(this.x, this.y - this.h/2, this.z + this.d/2) }, // top
-                    { d: Cuboid.getPlaneDistance(this.x + this.w/2, this.y, this.z + this.d/2) }, // right
-                    { d: Cuboid.getPlaneDistance(this.x, this.y + this.h/2, this.z + this.d/2) },  // bottom
-                    { d: Cuboid.getPlaneDistance(this.x, this.y, this.z + this.d) }, // back
+                this.points_fc = [
+                    {x: 0, y: 0, z: -d/2}, // front
+                    {x: - w/2, y: 0, z: 0}, // left
+                    {x: 0, y: - h/2, z: 0}, // top
+                    {x: w/2, y: 0, z: 0}, // right
+                    {x: 0, y: h/2, z: 0}, // bottom
+                    {x: 0, y: 0, z: d/2} // back
                 ];
             }
+            applyRotate(roll=0, pitch=0, yaw=0) {
+                const rotationX = Matrix4x4.rotationX(roll * Math.PI / 180);
+                const rotationY = Matrix4x4.rotationY(pitch * Math.PI / 180);
+                const rotationZ = Matrix4x4.rotationZ(yaw * Math.PI / 180);
+                const rotationMatrix = rotationZ.multiply(rotationY).multiply(rotationX);
+                this.points = this.points.map(point => {
+                    return rotationMatrix.transformPoint(point);
+                });
+                this.points_fc = this.points_fc.map(point => {
+                    return rotationMatrix.transformPoint(point);
+                });
+            }
+            applyTranslate(x=0, y=0, z=0) {
+                this.points = this.points.map(point => {
+                    return {
+                        x: point.x + x,
+                        y: point.y + y,
+                        z: point.z + z
+                    };
+                });
+                this.points_fc = this.points_fc.map(point => {
+                    return {
+                        x: point.x + x,
+                        y: point.y + y,
+                        z: point.z + z
+                    };
+                });
+            }
+            generatePlanes(){
+                this.planes = this.points_fc.map(point => {
+                    return { d: Cuboid.getPlaneDistance(point.x, point.y, point.z) };
+                });
+            }
             generateAngles() {
-                const left_front_ha = Cuboid.getAngleByDistance(this.x - this.w/2, 0, this.z, 'horizontal'); // left-front side horizontal angle
-                const right_front_ha = Cuboid.getAngleByDistance(this.x + this.w/2, 0, this.z, 'horizontal'); // right-front side horizontal angle
-                const top_front_va = Cuboid.getAngleByDistance(0, this.y - this.h/2, this.z, 'vertical'); // top-front side vertical angle
-                const bottom_front_va = Cuboid.getAngleByDistance(0, this.y + this.h/2, this.z, 'vertical'); // bottom-front side vertical angle
-                const left_rear_ha = Cuboid.getAngleByDistance(this.x - this.w/2, 0, this.z + this.d, 'horizontal'); // left-rear side horizontal angle
-                const right_rear_ha = Cuboid.getAngleByDistance(this.x + this.w/2, 0, this.z + this.d, 'horizontal'); // right-rear side horizontal angle
-                const top_rear_va = Cuboid.getAngleByDistance(0, this.y - this.h/2, this.z + this.d, 'vertical'); // top-rear side vertical angle
-                const bottom_rear_va = Cuboid.getAngleByDistance(0, this.y + this.h/2, this.z + this.d, 'vertical'); // bottom-rear side vertical angle
-                this.angles = [
-                    { h: right_front_ha, v: bottom_front_va }, // right-bottom front [0]
-                    { h: left_front_ha, v: bottom_front_va }, // left-bottom front [1]
-                    { h: left_front_ha, v: top_front_va }, // left-top front [2]
-                    { h: right_front_ha, v: top_front_va }, // right-top front [3]
-                    { h: right_rear_ha, v: bottom_rear_va }, // right-bottom rear [4]
-                    { h: left_rear_ha, v: bottom_rear_va }, // left-bottom rear [5]
-                    { h: left_rear_ha, v: top_rear_va }, // left-top rear [6]
-                    { h: right_rear_ha, v: top_rear_va } // right-top rear [7]
-                ];
+                this.angles = this.points.map(point => {
+                    return { h: Cuboid.getAngleByDistance(point.x, point.y, point.z, 'horizontal'), v: Cuboid.getAngleByDistance(point.x, point.y, point.z, 'vertical') };
+                });
             }
             generate2DCuboid(distance) {
                 const tps = Cuboid.getTransformedPoint(this.angles, distance);
@@ -544,7 +669,7 @@
                 cuboidDepth: 'mm',
                 cuboidX: 'mm',
                 cuboidY: 'mm',
-                cuboidZ: 'mm'
+                cuboidZ: 'cm',
             },
         };
 
@@ -583,6 +708,12 @@
             cuboidZ: document.getElementById('cuboidZ'),
             cuboidZUnit: document.getElementById('cuboidZUnit'),
             cuboidZRange: document.getElementById('cuboidZRange'),
+            cuboidRoll: document.getElementById('cuboidRoll'),
+            cuboidRollRange: document.getElementById('cuboidRollRange'),
+            cuboidPitch: document.getElementById('cuboidPitch'),
+            cuboidPitchRange: document.getElementById('cuboidPitchRange'),
+            cuboidYaw: document.getElementById('cuboidYaw'),
+            cuboidYawRange: document.getElementById('cuboidYawRange'),
         };
         const ctx = elements.canvas.getContext('2d');
 
@@ -1269,6 +1400,42 @@
                     state.units.cuboidZUnit = e.target.value;
                     state.cuboid.z = Math.max(1, Number(e.target.value)) * calculator.getUnitFactor(state.units.cuboidZUnit);
                     elements.cuboidZRange.value = state.cuboid.z / calculator.getUnitFactor(state.units.cuboidZUnit);
+                    updateUI();
+                });
+
+                elements.cuboidRoll.addEventListener('input', e => {
+                    state.cuboid.rx = Number(e.target.value);
+                    elements.cuboidRollRange.value = state.cuboid.rx;
+                    updateUI();
+                });
+
+                elements.cuboidRollRange.addEventListener('input', e => {
+                    state.cuboid.rx = Number(e.target.value);
+                    elements.cuboidRoll.value = state.cuboid.rx;
+                    updateUI();
+                });
+
+                elements.cuboidPitch.addEventListener('input', e => {
+                    state.cuboid.ry = Number(e.target.value);
+                    elements.cuboidPitchRange.value = state.cuboid.ry;
+                    updateUI();
+                });
+
+                elements.cuboidPitchRange.addEventListener('input', e => {
+                    state.cuboid.ry = Number(e.target.value);
+                    elements.cuboidPitch.value = state.cuboid.ry;
+                    updateUI();
+                });
+
+                elements.cuboidYaw.addEventListener('input', e => {
+                    state.cuboid.rz = Number(e.target.value);
+                    elements.cuboidYawRange.value = state.cuboid.rz;
+                    updateUI();
+                });
+
+                elements.cuboidYawRange.addEventListener('input', e => {
+                    state.cuboid.rz = Number(e.target.value);
+                    elements.cuboidYaw.value = state.cuboid.rz;
                     updateUI();
                 });
 
