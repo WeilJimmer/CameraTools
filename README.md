@@ -1,4 +1,4 @@
-# LensAngleViewCalculator
+# Camera Tools
 
 Camera Lens Angle of View Calculator (Web) 相機鏡頭可視角度計算機 (線上版)
 
@@ -6,9 +6,10 @@ An advanced web-based tool for precisely calculating and visualizing the field o
 
 Live Demo (線上使用) :
 
-[Get Started with the online free Calculator →](https://lens-angle.weil.app.wbftw.org/angle.htm)
+[FOV Calculator →](https://camera-tools.weil.app.wbftw.org/angle.htm)
+[Light Calculator →](https://camera-tools.weil.app.wbftw.org/light.htm)
 
-[More detail in Wiki →](https://github.com/WeilJimmer/LensAngleViewCalculator/wiki)
+[More detail in Wiki →](https://github.com/WeilJimmer/CameraTools/wiki)
 
 ## Feature
 
