@@ -1,0 +1,296 @@
+{
+    "MF_645": {
+        "width": 56,
+        "height": 41.5,
+        "label": "Medium Format (4:3) Pentax 645",
+        "ratio": "4:3",
+        "text": "【53.40 mm x 40.00 mm】 Medium Format (Phase One XF, Pentax 645) (4:3)"
+    },
+    "MF_H": {
+        "width": 53.4,
+        "height": 40,
+        "label": "Medium Format (4:3) Hasselblad H6D-100c",
+        "ratio": "4:3",
+        "text": "【53.40 mm x 40.00 mm】 Medium Format (Hasselblad H6D-100c) (4:3)"
+    },
+    "MF_PH": {
+        "width": 44,
+        "height": 33,
+        "label": "Medium Format (4:3) Phase One",
+        "ratio": "4:3",
+        "text": "【44.00 mm x 33.00 mm】 Medium Format (Phase One, Hasselblad X1D) (4:3)"
+    },
+    "MF_GFX": {
+        "width": 43.8,
+        "height": 32.9,
+        "label": "Medium Format (4:3) GFX",
+        "ratio": "4:3",
+        "text": "【43.80 mm x 32.90 mm】 Medium Format (Fujifilm GFX) (4:3)"
+    },
+    "FF": {
+        "width": 36,
+        "height": 24,
+        "label": "Full Frame (3:2)",
+        "ratio": "3:2",
+        "text": "【36.00 mm x 24.00 mm】 Full Frame (3:2)"
+    },
+    "APSH": {
+        "width": 27.9,
+        "height": 18.6,
+        "label": "APS-H (3:2)",
+        "ratio": "3:2",
+        "text": "【27.90 mm x 18.60 mm】 APS-H (3:2)"
+    },
+    "APSC_S": {
+        "width": 23.6,
+        "height": 15.6,
+        "label": "APS-C (Sony, Fujifilm, Nikon) (3:2)",
+        "ratio": "3:2",
+        "text": "【23.60 mm x 15.60 mm】 APS-C (Sony,Fujifilm,Nikon) (3:2)"
+    },
+    "APSC_C": {
+        "width": 22.2,
+        "height": 14.8,
+        "label": "APS-C (Canon) (3:2)",
+        "ratio": "3:2",
+        "text": "【22.20 mm x 14.80 mm】 APS-C (Canon) (3:2)"
+    },
+    "1_8in": {
+        "width": 21.9,
+        "height": 16.4,
+        "label": "1.8\" (4:3)",
+        "ratio": "4:3",
+        "text": "【21.90 mm x 16.40 mm】 1.8\" (4:3)"
+    },
+    "1_7in": {
+        "width": 20.8,
+        "height": 15.6,
+        "label": "1.7\" (4:3)",
+        "ratio": "4:3",
+        "text": "【20.80 mm x 15.60 mm】 1.7\" (4:3)"
+    },
+    "1_6in": {
+        "width": 20.1,
+        "height": 15.05,
+        "label": "1.6\" (4:3)",
+        "ratio": "4:3",
+        "text": "【20.10 mm x 15.05 mm】 1.6\" (4:3)"
+    },
+    "1_5in": {
+        "width": 18.7,
+        "height": 14,
+        "label": "1.5\" (4:3)",
+        "ratio": "4:3",
+        "text": "【18.70 mm x 14.00 mm】 1.5\" (4:3)"
+    },
+    "1_4in": {
+        "width": 18,
+        "height": 13.5,
+        "label": "1.4\" (4:3)",
+        "ratio": "4:3",
+        "text": "【18.00 mm x 13.50 mm】 1.4\" (4:3)"
+    },
+    "M43": {
+        "width": 17.3,
+        "height": 13,
+        "label": "M43 (4:3)",
+        "ratio": "4:3",
+        "text": "【17.30 mm x 13.00 mm】 M43 (4:3)"
+    },
+    "1_2in": {
+        "width": 16,
+        "height": 12,
+        "label": "1.2\" (4:3)",
+        "ratio": "4:3",
+        "text": "【16.00 mm x 12.00 mm】 1.2\" (4:3)"
+    },
+    "1_1in": {
+        "width": 14.7,
+        "height": 11,
+        "label": "1.1\" (4:3)",
+        "ratio": "4:3",
+        "text": "【14.70 mm x 11.00 mm】 1.1\" (4:3)"
+    },
+    "1inR32": {
+        "width": 13.2,
+        "height": 8.8,
+        "label": "1\" (3:2)",
+        "ratio": "3:2",
+        "text": "【13.20 mm x 8.80 mm】 1\" (3:2)"
+    },
+    "1in": {
+        "width": 12.8,
+        "height": 9.6,
+        "label": "1\" (4:3)",
+        "ratio": "4:3",
+        "text": "【12.80 mm x 9.60 mm】 1\" (4:3)"
+    },
+    "1in1_1": {
+        "width": 11.6,
+        "height": 8.7,
+        "label": "1/1.1\" (4:3)",
+        "ratio": "4:3",
+        "text": "【11.60 mm x 8.70 mm】 1/1.1\" (4:3)"
+    },
+    "1in1_2": {
+        "width": 10.67,
+        "height": 8,
+        "label": "1/1.2\" (4:3)",
+        "ratio": "4:3",
+        "text": "【10.67 mm x 8.00 mm】 1/1.2\" (4:3)"
+    },
+    "1in1_3": {
+        "width": 9.6,
+        "height": 7.2,
+        "label": "1/1.3\" (4:3)",
+        "ratio": "4:3",
+        "text": "【9.60 mm x 7.20 mm】 1/1.3\" (4:3)"
+    },
+    "1in1_4": {
+        "width": 8.9,
+        "height": 6.67,
+        "label": "1/1.4\" (4:3)",
+        "ratio": "4:3",
+        "text": "【8.90 mm x 6.67 mm】 1/1.4\" (4:3)"
+    },
+    "2in3": {
+        "width": 8.8,
+        "height": 6.6,
+        "label": "2/3\" (4:3)",
+        "ratio": "4:3",
+        "text": "【8.80 mm x 6.60 mm】 2/3\" (4:3)"
+    },
+    "1in1_6": {
+        "width": 8,
+        "height": 6,
+        "label": "1/1.6\" (4:3)",
+        "ratio": "4:3",
+        "text": "【8.00 mm x 6.00 mm】 1/1.6\" (4:3)"
+    },
+    "1in1_7": {
+        "width": 7.6,
+        "height": 5.7,
+        "label": "1/1.7\" (4:3)",
+        "ratio": "4:3",
+        "text": "【7.60 mm x 5.70 mm】 1/1.7\" (4:3)"
+    },
+    "1in1_8": {
+        "width": 7.2,
+        "height": 5.4,
+        "label": "1/1.8\" (4:3)",
+        "ratio": "4:3",
+        "text": "【7.20 mm x 5.40 mm】 1/1.8\" (4:3)"
+    },
+    "1in1_9": {
+        "width": 6.8,
+        "height": 5.1,
+        "label": "1/1.9\" (4:3)",
+        "ratio": "4:3",
+        "text": "【6.80 mm x 5.10 mm】 1/1.9\" (4:3)"
+    },
+    "1in2": {
+        "width": 6.67,
+        "height": 5,
+        "label": "1/2\" (4:3)",
+        "ratio": "4:3",
+        "text": "【6.67 mm x 5.00 mm】 1/2\" (4:3)"
+    },
+    "1in2_1": {
+        "width": 6.4,
+        "height": 4.8,
+        "label": "1/2.1\" (4:3)",
+        "ratio": "4:3",
+        "text": "【6.40 mm x 4.80 mm】 1/2.1\" (4:3)"
+    },
+    "1in2_2": {
+        "width": 6.16,
+        "height": 4.62,
+        "label": "1/2.2\" (4:3)",
+        "ratio": "4:3",
+        "text": "【6.16 mm x 4.62 mm】 1/2.2\" (4:3)"
+    },
+    "1in2_3": {
+        "width": 6,
+        "height": 4.5,
+        "label": "1/2.3\" (4:3)",
+        "ratio": "4:3",
+        "text": "【6.00 mm x 4.50 mm】 1/2.3\" (4:3)"
+    },
+    "1in2_4": {
+        "width": 5.9,
+        "height": 4.43,
+        "label": "1/2.4\" (4:3)",
+        "ratio": "4:3",
+        "text": "【5.90 mm x 4.43 mm】 1/2.4\" (4:3)"
+    },
+    "1in2_5": {
+        "width": 5.76,
+        "height": 4.29,
+        "label": "1/2.5\" (4:3)",
+        "ratio": "4:3",
+        "text": "【5.76 mm x 4.29 mm】 1/2.5\" (4:3)"
+    },
+    "1in2_6": {
+        "width": 5.5,
+        "height": 4.1,
+        "label": "1/2.6\" (4:3)",
+        "ratio": "4:3",
+        "text": "【5.50 mm x 4.10 mm】 1/2.6\" (4:3)"
+    },
+    "1in2_7": {
+        "width": 5.3,
+        "height": 4,
+        "label": "1/2.7\" (4:3)",
+        "ratio": "4:3",
+        "text": "【5.30 mm x 4.00 mm】 1/2.7\" (4:3)"
+    },
+    "1in2_8": {
+        "width": 5.1,
+        "height": 3.83,
+        "label": "1/2.8\" (4:3)",
+        "ratio": "4:3",
+        "text": "【5.10 mm x 3.83 mm】 1/2.8\" (4:3)"
+    },
+    "1in2_9": {
+        "width": 4.9,
+        "height": 3.67,
+        "label": "1/2.9\" (4:3)",
+        "ratio": "4:3",
+        "text": "【4.90 mm x 3.67 mm】 1/2.9\" (4:3)"
+    },
+    "1in3": {
+        "width": 4.8,
+        "height": 3.6,
+        "label": "1/3\" (4:3)",
+        "ratio": "4:3",
+        "text": "【4.80 mm x 3.60 mm】 1/3\" (4:3)"
+    },
+    "1in3_2": {
+        "width": 4.54,
+        "height": 3.42,
+        "label": "1/3.2\" (4:3)",
+        "ratio": "4:3",
+        "text": "【4.54 mm x 3.42 mm】 1/3.2\" (4:3)"
+    },
+    "1in3_6": {
+        "width": 4,
+        "height": 3,
+        "label": "1/3.6\" (4:3)",
+        "ratio": "4:3",
+        "text": "【4.00 mm x 3.00 mm】 1/3.6\" (4:3)"
+    },
+    "1in4": {
+        "width": 3.6,
+        "height": 2.7,
+        "label": "1/4\" (4:3)",
+        "ratio": "4:3",
+        "text": "【3.60 mm x 2.70 mm】 1/4\" (4:3)"
+    },
+    "1in5": {
+        "width": 2.88,
+        "height": 2.16,
+        "label": "1/5\" (4:3)",
+        "ratio": "4:3",
+        "text": "【2.88 mm x 2.16 mm】 1/5\" (4:3)"
+    }
+}

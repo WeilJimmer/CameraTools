@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Gathering Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: block;
+            margin: 20px auto;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f9f4;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .results h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .sensor-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .sensor-col {
+            flex: 1;
+        }
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 12px;
+            line-height: 16px;
+            cursor: help;
+            margin-left: 5px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            font-size: 12px;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .resolution-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .resolution-group input {
+            text-align: center;
+        }
+        .resolution-group span {
+            font-weight: bold;
+        }
+        .formula {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            font-family: monospace;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .resolution-result {
+            font-weight: bold;
+            margin-left: 5px;
+            color: #2c3e50;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .error {
+            color: #e74c3c;
+            background-color: #fadbd8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Photographic Light Gathering Calculator</h1>
+        <p>Calculate the effective light gathering capability of a camera system based on sensor and lens characteristics.</p>
+        <div id="loadingMessage" class="loading">Loading sensor data...</div>
+        <div id="errorMessage" class="error" style="display: none;"></div>
+        <div id="calculatorForm" style="display: none;">
+            <div class="form-group">
+                <label>Sensor Format 
+                    <span class="tooltip"><span class="info-icon">i</span>
+                        <span class="tooltiptext">The physical size of the image sensor</span>
+                    </span>
+                </label>
+                <select id="sensorFormat"></select>
+            </div>
+            <div class="form-group sensor-info">
+                <div class="sensor-col">
+                    <label>Sensor Technology
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">The technology used in the sensor construction</span>
+                        </span>
+                    </label>
+                    <select id="sensorTech">
+                        <option value="0.42">Front-Side Illuminated FSI (0.42) Canon 5D Mark III, Nikon D610</option>
+                        <option value="0.63" selected>Back-Side Illuminated BSI (0.63) Sony A7 III, Nikon Z6, Canon R6</option>
+                        <option value="0.70">Stacked BSI CMOS (0.70) Sony A1, Nikon Z9, Canon R3</option>
+                        <option value="0.73">Dual/Quad Pixel BSI (0.73) Canon R5(Dual), Sony A7R(Quad)</option>
+                        <option value="0.78">Medium Format BSI (0.78) Hasselblad X2D 100C, Fujifilm GFX100 II</option>
+                        <option value="0.88">Monochrome No Bayer (0.88) Leica M10 Monochrom, Phase One IQ4 Achromatic</option>
+                        <option value="0.93">Astronomical CMOS (0.93) ZWO ASI6200MM Pro, QHY600M</option>
+                    </select>
+                </div>
+                <div class="sensor-col">
+                    <label>Resolution Preset
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">Common resolution presets</span>
+                        </span>
+                    </label>
+                    <select id="resolutionPreset">
+                        <option value="custom">Custom Resolution</option>
+                        <option value="sd">SD (640×480, 4:3)</option>
+                        <option value="hd">HD (1280×720, 16:9)</option>
+                        <option value="fhd">FHD (1920×1080, 16:9)</option>
+                        <option value="4k">4K UHD (3840×2160, 16:9)</option>
+                        <option value="6k">6K (6144×3456, 16:9)</option>
+                        <option value="8k">8K UHD (7680×4320, 16:9)</option>
+                        <option value="12mp">12 Megapixels (4000×3000, 4:3)</option>
+                        <option value="16mp">16 Megapixels (4608×3456, 4:3)</option>
+                        <option value="20mp">20 Megapixels (5472×3648, 3:2)</option>
+                        <option value="24mp" selected>24 Megapixels (6000×4000, 3:2)</option>
+                        <option value="36mp">36 Megapixels (7360×4912, 3:2)</option>
+                        <option value="45mp">45 Megapixels (8192×5464, 3:2)</option>
+                        <option value="61mp">61 Megapixels (9504×6336, 3:2)</option>
+                        <option value="100mp">100 Megapixels (11648×8736, 4:3)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Custom Resolution
+                    <span class="tooltip"><span class="info-icon">i</span>
+                        <span class="tooltiptext">Sensor resolution in pixels</span>
+                    </span>
+                </label>
+                <div class="resolution-group">
+                    <input type="number" id="resWidth" value="6000" step="1" min="1">
+                    <span>×</span>
+                    <input type="number" id="resHeight" value="4000" step="1" min="1">
+                    <span>=</span>
+                    <span id="totalPixels" class="resolution-result">24,000,000 pixels</span>
+                </div>
+            </div>
+            <div class="form-group sensor-info">
+                <div class="sensor-col">
+                    <label>Aperture (F-stop)
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">The f-number of the lens</span>
+                        </span>
+                    </label>
+                    <select id="aperture">
+                        <option value="1.0">f/1.0</option>
+                        <option value="1.1">f/1.1</option>
+                        <option value="1.2">f/1.2</option>
+                        <option value="1.4">f/1.4</option>
+                        <option value="1.6">f/1.6</option>
+                        <option value="1.8">f/1.8</option>
+                        <option value="2">f/2.0</option>
+                        <option value="2.2">f/2.2</option>
+                        <option value="2.5">f/2.5</option>
+                        <option value="2.8" selected>f/2.8</option>
+                        <option value="3.2">f/3.2</option>
+                        <option value="3.5">f/3.5</option>
+                        <option value="4">f/4.0</option>
+                        <option value="4.5">f/4.5</option>
+                        <option value="5">f/5.0</option>
+                        <option value="5.6">f/5.6</option>
+                        <option value="6.3">f/6.3</option>
+                        <option value="7.1">f/7.1</option>
+                        <option value="8">f/8.0</option>
+                        <option value="9">f/9.0</option>
+                        <option value="10">f/10</option>
+                        <option value="11">f/11</option>
+                        <option value="13">f/13</option>
+                        <option value="14">f/14</option>
+                        <option value="16">f/16</option>
+                        <option value="18">f/18</option>
+                        <option value="20">f/20</option>
+                        <option value="22">f/22</option>
+                        <option value="25">f/25</option>
+                        <option value="29">f/29</option>
+                        <option value="32">f/32</option>
+                    </select>
+                </div>
+                <div class="sensor-col">
+                    <label>Lens Transmission
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">The ratio of T-stop to F-stop</span>
+                        </span>
+                    </label>
+                    <select id="lensTransmission">
+                        <option value="1.0">T-stop = F-stop (1.0)</option>
+                        <option value="0.95">Cinema Lens (0.95)</option>
+                        <option value="0.93">Sony G Master (0.93)</option>
+                        <option value="0.92">Canon L RF/Nikon S (0.92)</option>
+                        <option value="0.92">Zeiss Otus/Milvus (0.92)</option>
+                        <option value="0.91">Panasonic Leica (0.91)</option>
+                        <option value="0.90" selected>Canon L EF/Fuji XF Red Badge (0.90)</option>
+                        <option value="0.89">Nikon Gold Ring/Sony G (0.89)</option>
+                        <option value="0.89">Pentax Star/Limited (0.89)</option>
+                        <option value="0.88">Sigma Art/Tamron SP (0.88)</option>
+                        <option value="0.87">Sigma Sport/Fuji Standard (0.87)</option>
+                        <option value="0.86">Canon Non-L/Sigma Contemporary (0.86)</option>
+                        <option value="0.85">Nikon Standard/Sony Standard (0.85)</option>
+                        <option value="0.80">Vintage/Legacy Lenses (0.80)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group sensor-info">
+                <div class="sensor-col">
+                    <label>Shutter Speed
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">The duration the sensor is exposed to light</span>
+                        </span>
+                    </label>
+                    <select id="shutterSpeed">
+                        <option value="0.000015625">1/64000s</option>
+                        <option value="0.00003125">1/32000s</option>
+                        <option value="0.0000625">1/16000s</option>
+                        <option value="0.000125">1/8000s</option>
+                        <option value="0.00025">1/4000s</option>
+                        <option value="0.0005">1/2000s</option>
+                        <option value="0.001">1/1000s</option>
+                        <option value="0.002">1/500s</option>
+                        <option value="0.004">1/250s</option>
+                        <option value="0.008">1/125s</option>
+                        <option value="0.01666667" selected="selected">1/60s</option>
+                        <option value="0.03333333">1/30s</option>
+                        <option value="0.06666667">1/15s</option>
+                        <option value="0.125">1/8s</option>
+                        <option value="0.25">1/4s</option>
+                        <option value="0.5">1/2s</option>
+                        <option value="1">1s</option>
+                        <option value="2">2s</option>
+                        <option value="4">4s</option>
+                        <option value="8">8s</option>
+                        <option value="15">15s</option>
+                        <option value="30">30s</option>
+                    </select>
+                </div>
+                <div class="sensor-col">
+                    <label>ISO Sensitivity
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">The sensitivity of the sensor to light</span>
+                        </span>
+                    </label>
+                    <select id="isoSensitivity">
+                        <option value="50">ISO 50</option>
+                        <option value="100" selected="selected">ISO 100</option>
+                        <option value="200">ISO 200</option>
+                        <option value="400">ISO 400</option>
+                        <option value="800">ISO 800</option>
+                        <option value="1600">ISO 1600</option>
+                        <option value="3200">ISO 3200</option>
+                        <option value="6400">ISO 6400</option>
+                        <option value="12800">ISO 12800</option>
+                        <option value="25600">ISO 25600</option>
+                        <option value="51200">ISO 51200</option>
+                        <option value="102400">ISO 102400</option>
+                        <option value="204800">ISO 204800</option>
+                        <option value="409600">ISO 409600</option>
+                    </select>
+                </div>
+            </div>
+            <button id="calculate">Calculate Light Gathering</button>
+            <div class="results" id="results">
+                <h2>Results</h2>
+                <p id="pixelSize">Pixel Size: <span></span> μm²</p>
+                <p id="sensorArea">Sensor Area: <span></span> mm²</p>
+                <p id="effectiveAperture">Effective Aperture (T-stop): <span></span></p>
+                <p id="lightGathering">Light Gathering per Pixel: <span></span></p>
+                <p id="relativeGathering">Relative Light Gathering (compared to FF 24MP at f/2.8 1/60s iso100): <span></span></p>
+                <p id="conclusion">System Analysis: <span></span></p>
+            </div>
+            <div class="formula">
+                <h3>Calculation Formula:</h3>
+                <p>Result = (Sensor Area / Total Pixels) × QE × (1 / (F-stop / Transmission)²) × (shutterSpeed × 60) × ISO × 10000</p>
+                <p>Where:</p>
+                <ul>
+                    <li>Sensor Area = Width × Height (in mm²)</li>
+                    <li>Total Pixels = Resolution Width × Resolution Height</li>
+                    <li>QE = Quantum Efficiency of the sensor technology</li>
+                    <li>Effective Aperture = F-stop / Transmission</li>
+                    <li>Shutter Speed = Exposure time in seconds (1/60s)</li>
+                    <li>ISO = Sensitivity of the sensor</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let sensorData = {};
+            // Resolution presets
+            const resolutionPresets = {
+                'sd': { width: 640, height: 480, aspect: '4:3' },
+                'hd': { width: 1280, height: 720, aspect: '16:9' },
+                'fhd': { width: 1920, height: 1080, aspect: '16:9' },
+                '4k': { width: 3840, height: 2160, aspect: '16:9' },
+                '6k': { width: 6144, height: 3456, aspect: '16:9' },
+                '8k': { width: 7680, height: 4320, aspect: '16:9' },
+                '12mp': { width: 4000, height: 3000, aspect: '4:3' },
+                '16mp': { width: 4608, height: 3456, aspect: '4:3' },
+                '20mp': { width: 5472, height: 3648, aspect: '3:2' },
+                '24mp': { width: 6000, height: 4000, aspect: '3:2' },
+                '36mp': { width: 7360, height: 4912, aspect: '3:2' },
+                '45mp': { width: 8192, height: 5464, aspect: '3:2' },
+                '61mp': { width: 9504, height: 6336, aspect: '3:2' },
+                '100mp': { width: 11648, height: 8736, aspect: '4:3' },
+            };
+            // Load CMOS data from JSON file
+            fetch('./cmos.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    sensorData = data;
+                    populateSensorFormats();
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('calculatorForm').style.display = 'block';
+                    // Initialize calculator
+                    initializeCalculator();
+                })
+                .catch(error => {
+                    console.error('Error loading sensor data:', error);
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('errorMessage').textContent = 'Error loading sensor data. Please try refreshing the page.';
+                    document.getElementById('errorMessage').style.display = 'block';
+                });
+            function populateSensorFormats() {
+                const selectElement = document.getElementById('sensorFormat');
+                // Clear existing options
+                selectElement.innerHTML = '';
+                // Add all formats from the JSON data
+                for (const key in sensorData) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = sensorData[key].text;
+                    selectElement.appendChild(option);
+                    // Set full frame as default
+                    if (key === 'FF') {
+                        option.selected = true;
+                    }
+                }
+            }
+            function initializeCalculator() {
+                // Set event listeners
+                document.getElementById('sensorFormat').addEventListener('change', calculateLightGathering);
+                document.getElementById('resolutionPreset').addEventListener('change', updateResolutionFromPreset);
+                document.getElementById('resWidth').addEventListener('input', updateTotalPixels);
+                document.getElementById('resHeight').addEventListener('input', updateTotalPixels);
+                document.getElementById('aperture').addEventListener('change', calculateLightGathering);
+                document.getElementById('sensorTech').addEventListener('change', calculateLightGathering);
+                document.getElementById('lensTransmission').addEventListener('change', calculateLightGathering);
+                document.getElementById('shutterSpeed').addEventListener('change', calculateLightGathering);
+                document.getElementById('isoSensitivity').addEventListener('change', calculateLightGathering);
+                document.getElementById('calculate').addEventListener('click', calculateLightGathering);
+                // Initialize with default values
+                updateResolutionFromPreset();
+                calculateLightGathering();
+            }
+            function updateResolutionFromPreset() {
+                const preset = document.getElementById('resolutionPreset').value;
+                if (preset !== 'custom' && resolutionPresets[preset]) {
+                    document.getElementById('resWidth').value = resolutionPresets[preset].width;
+                    document.getElementById('resHeight').value = resolutionPresets[preset].height;
+                    updateTotalPixels();
+                }
+            }
+            function updateTotalPixels() {
+                const width = parseInt(document.getElementById('resWidth').value);
+                const height = parseInt(document.getElementById('resHeight').value);
+                const total = width * height;
+                document.getElementById('totalPixels').textContent = total.toLocaleString() + ' pixels';
+                calculateLightGathering();
+            }
+            function calculateLightGathering() {
+                // Get sensor dimensions
+                const sensorFormat = document.getElementById('sensorFormat').value;
+                if (!sensorData[sensorFormat]) {
+                    console.error('Selected sensor format not found in data');
+                    return;
+                }
+                const sensorWidth = sensorData[sensorFormat].width;
+                const sensorHeight = sensorData[sensorFormat].height;
+                // Get resolution
+                const pixelsWidth = parseInt(document.getElementById('resWidth').value);
+                const pixelsHeight = parseInt(document.getElementById('resHeight').value);
+                // Get other parameters
+                const aperture = parseFloat(document.getElementById('aperture').value);
+                const qeValue = parseFloat(document.getElementById('sensorTech').value);
+                const transmission = parseFloat(document.getElementById('lensTransmission').value);
+                const shutterSpeed = parseFloat(document.getElementById('shutterSpeed').value);
+                const isoSensitivity = parseFloat(document.getElementById('isoSensitivity').value);
+                // Calculate values
+                const light = 1000000;
+                const sensorArea = sensorWidth * sensorHeight; // mm²
+                const totalPixels = pixelsWidth * pixelsHeight;
+                if (totalPixels === 0) {
+                    document.getElementById('errorMessage').textContent = 'Error: Resolution cannot be zero.';
+                    document.getElementById('errorMessage').style.display = 'block';
+                    return;
+                } else {
+                    document.getElementById('errorMessage').style.display = 'none';
+                }
+                const pixelSize = (sensorArea / totalPixels); // mm²
+                const pixelSizeMicrons = pixelSize * 1000000; // μm²
+                const effectiveAperture = aperture / transmission;
+                const lightGatheringPerPixel = light * pixelSize * qeValue / (effectiveAperture * effectiveAperture) * (shutterSpeed * 60) * (isoSensitivity / 100); // mm²
+                // Normalize to a reference system for comparison (Full Frame, 24MP, BSI, f/2.8, T=0.9)
+                const referencePixelSize = (36 * 24) / (6000 * 4000); // mm²
+                const referenceLightGathering = light * referencePixelSize * 0.63 / ((2.8 / 0.9) * (2.8 / 0.9));
+                const relativeGathering = lightGatheringPerPixel / referenceLightGathering;
+                // Update results
+                document.getElementById('pixelSize').querySelector('span').textContent = pixelSizeMicrons.toFixed(2);
+                document.getElementById('sensorArea').querySelector('span').textContent = sensorArea.toFixed(2);
+                document.getElementById('effectiveAperture').querySelector('span').textContent = effectiveAperture.toFixed(2);
+                document.getElementById('lightGathering').querySelector('span').textContent = lightGatheringPerPixel.toFixed(6) + ' units';
+                document.getElementById('relativeGathering').querySelector('span').textContent = relativeGathering.toFixed(5) + 'x';
+                // Generate conclusion
+                let canvas = document.createElement('canvas');
+                canvas.width = results.clientWidth - 20;
+                canvas.height = 30;
+                document.getElementById('conclusion').innerHTML = 'Result: (Higher is better)'; // Clear previous content
+                document.getElementById('conclusion').appendChild(canvas);
+                let ctx = canvas.getContext('2d');
+                ctx.font = '16px Arial';
+                // fill rainbow color background with size width 100% height 30px
+                let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+                gradient.addColorStop(0, '#FF0000');
+                gradient.addColorStop(0.2, '#FF7F00');
+                gradient.addColorStop(0.4, '#FFFF00');
+                gradient.addColorStop(0.6, '#00FF00');
+                gradient.addColorStop(0.8, '#0000FF');
+                gradient.addColorStop(1, '#8B00FF');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, 30);
+                ctx.fillStyle = 'black';
+                let maxScale = relativeGathering > 1 ? Math.ceil(relativeGathering) : 1;
+                let maxScalePx = canvas.width / maxScale;
+                ctx.fillStyle = '#222';
+                if (relativeGathering <0 || relativeGathering > maxScale) {
+                    ctx.fillText('Out of range', 0, 20);
+                } else {
+                    ctx.fillRect((relativeGathering)*maxScalePx, 0, 1, 30);
+                    ctx.fillStyle = '#222';
+                    ctx.fillText(relativeGathering.toFixed(2) + 'x', (relativeGathering)*maxScalePx, 20);
+                    ctx.fillStyle = 'white';
+                    for(let i = 0; i <= maxScale; i=(i+Math.ceil(maxScale/10))) {
+                        ctx.fillText(i, i*maxScalePx-10, 20);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
