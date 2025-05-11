@@ -353,6 +353,7 @@
                 <p id="effectiveAperture">Effective Aperture (T-stop): <span></span></p>
                 <p id="lightGathering">Light Gathering per Pixel: <span></span></p>
                 <p id="relativeGathering">Relative Light Gathering (compared to FF 24MP at f/2.8 1/60s iso100): <span></span></p>
+                <p id="relativeStopChange">Relative Stop Change: <span></span></p>
                 <p id="conclusion">System Analysis: <span></span></p>
             </div>
             <div class="formula">
@@ -497,12 +498,14 @@
                 const referencePixelSize = (36 * 24) / (6000 * 4000); // mm²
                 const referenceLightGathering = light * referencePixelSize * 0.63 / ((2.8 / 0.9) * (2.8 / 0.9));
                 const relativeGathering = lightGatheringPerPixel / referenceLightGathering;
+                const stopsChange = Math.log(relativeGathering) / Math.log(2);
                 // Update results
                 document.getElementById('pixelSize').querySelector('span').textContent = pixelSizeMicrons.toFixed(2);
                 document.getElementById('sensorArea').querySelector('span').textContent = sensorArea.toFixed(2);
                 document.getElementById('effectiveAperture').querySelector('span').textContent = effectiveAperture.toFixed(2);
                 document.getElementById('lightGathering').querySelector('span').textContent = lightGatheringPerPixel.toFixed(6) + ' units';
                 document.getElementById('relativeGathering').querySelector('span').textContent = relativeGathering.toFixed(5) + 'x';
+                document.getElementById('relativeStopChange').querySelector('span').textContent = stopsChange.toFixed(2) + ' stops';
                 // Generate conclusion
                 let canvas = document.createElement('canvas');
                 canvas.width = results.clientWidth - 20;
@@ -522,19 +525,27 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, 30);
                 ctx.fillStyle = 'black';
-                let maxScale = relativeGathering > 1 ? Math.ceil(relativeGathering) : 1;
-                let maxScalePx = canvas.width / maxScale;
+                let maxScale = 2;
+                let minScale = -2;
+                if (stopsChange > 1) {
+                    maxScale = Math.ceil(stopsChange)+2;
+                } else if (stopsChange < -1) {
+                    minScale = Math.floor(stopsChange)-2;
+                }
+                let stopWidth = canvas.width / (maxScale+Math.abs(minScale));
+                let padStops = Math.abs(minScale);
+                let step = Math.ceil((maxScale - minScale) / 20);
+                ctx.fillStyle = 'white';
+                for(let i = minScale; i <= maxScale; i=i+step) {
+                    ctx.fillText(i, (i+padStops)*stopWidth-10, 20);
+                }
                 ctx.fillStyle = '#222';
-                if (relativeGathering <0 || relativeGathering > maxScale) {
+                if (stopsChange < minScale || stopsChange > maxScale) {
                     ctx.fillText('Out of range', 0, 20);
                 } else {
-                    ctx.fillRect((relativeGathering)*maxScalePx, 0, 1, 30);
+                    ctx.fillRect((stopsChange+padStops)*stopWidth, 0, 1, 30);
                     ctx.fillStyle = '#222';
-                    ctx.fillText(relativeGathering.toFixed(2) + 'x', (relativeGathering)*maxScalePx, 20);
-                    ctx.fillStyle = 'white';
-                    for(let i = 0; i <= maxScale; i=(i+Math.ceil(maxScale/10))) {
-                        ctx.fillText(i, i*maxScalePx-10, 20);
-                    }
+                    ctx.fillText(stopsChange.toFixed(2) + 'x', (stopsChange+padStops)*stopWidth, 20);
                 }
             }
         });
