@@ -1,8 +1,6 @@
 # Camera Tools
 
-Camera Lens Angle of View Calculator (Web) 相機鏡頭可視角度計算機 (線上版)
-
-An advanced web-based tool for precisely calculating and visualizing the field of view (FOV) for various camera sensors and lens combinations.
+Advanced web-based calculators for photographers and cinematographers to understand their equipment's optical characteristics and performance.
 
 Live Demo (線上使用) :
 
@@ -12,21 +10,41 @@ Live Demo (線上使用) :
 
 [More detail in Wiki →](https://github.com/WeilJimmer/CameraTools/wiki)
 
-## Feature
+## Tools Available
 
-- Comprehensive Sensor Support: Calculate FOV for any sensor size from medium format to smartphone sensors (over 40 different sensor formats included)
-- High-Precision Angular Calculations: Get accurate diagonal, horizontal, and vertical field of view angles for any given focal length
-- 35mm Equivalent Conversion: Automatically displays the 35mm equivalent focal length and crop factor (e.g., APS-C = 1.5x)
-- Visual Representation: See a graphical representation of your field of view with clear rectangular outlines
-- Comparative Analysis: Compare multiple sensor/lens combinations simultaneously to understand coverage differences
-- Reference Image Support: Upload reference images to visualize how different sensor sizes would crop the same scene
-- Flexible Alignment Options: Choose between multiple alignment modes including center, bottom-left, left-center, and bottom-center
+### 1. Field of View (FOV) Calculator
+
+Calculate and visualize the exact field of view for different camera sensor and lens combinations.
+
+**Features:**
+- Comprehensive Sensor Support: From medium format to smartphone sensors (40+ formats)
+- High-Precision Angular Calculations: Accurate diagonal, horizontal, and vertical FOV angles
+- 35mm Equivalent Conversion: Automatic equivalent focal length and crop factor display
+- Visual Representation: Graphical visualization of FOV with clear rectangular outlines
+- Comparative Analysis: Compare multiple sensor/lens combinations simultaneously
+- Reference Image Support: Upload images to visualize how different sensors crop a scene
+- Flexible Alignment Options: Multiple alignment modes including center, bottom-left, etc.
+
+### 2. Light Gathering Calculator
+
+Calculate the effective light gathering capability of a camera system based on sensor size, resolution, technology, and exposure settings.
+
+**Features:**
+- Comprehensive Sensor Support: From medium format to smartphone sensors
+- Sensor Technology Comparison: Analysis based on sensor construction (FSI, BSI, stacked, monochrome)
+- Resolution Impact Analysis: See how megapixel count affects light gathering
+- Lens Transmission Calculation: Account for real-world T-stop variations between lens models
+- Exposure Variables: Calculate with different apertures, shutter speeds, and ISO values
+- Reference Comparison: Results normalized against a reference system (FF 24MP at f/2.8 1/60s ISO100)
+- Visual Results: Graphical representation of performance in photographic stops
 
 ## Screenshot
 
 ![Demo](docs/demo.jpg)
 
 ## Supported CMOS Size
+
+The tools support over 40 different sensor formats, from medium format to tiny smartphone sensors.
 
 P.S: CMOS sensor size does not refer to diagonal line but to the size of vacuum camera tubes, which is why a '1-inch' sensor actually measures 12.8 mm x 9.6 mm, with a diagonal of 0.63'' (16mm), not corresponding to the traditional meaning of a 1-inch sensor.
 
