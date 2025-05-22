@@ -34,6 +34,13 @@
         "ratio": "3:2",
         "text": "【36.00 mm x 24.00 mm】 Full Frame (3:2)"
     },
+    "FF_12": {
+        "width": 30,
+        "height": 20,
+        "label": "1.2x Crop Full Frame (3:2)",
+        "ratio": "3:2",
+        "text": "【30.00 mm x 20.00 mm】 1.2x Crop Full Frame (3:2)"
+    },
     "APSH": {
         "width": 27.9,
         "height": 18.6,
