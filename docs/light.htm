@@ -176,7 +176,10 @@
                         </span>
                     </label>
                     <select id="sensorTech">
+                        <option value="0.38">Basic FSI CMOS (0.38) Budget IPCams, Entry DVRs</option>
                         <option value="0.42">Front-Side Illuminated FSI (0.42) Canon 5D Mark III, Nikon D610</option>
+                        <option value="0.55">Basic BSI CMOS (0.55) Standard IPCams, Basic Dashcams</option>
+                        <option value="0.60">Mid-range BSI CMOS (0.60) Sony IMX335, Dashcams ?000+</option>
                         <option value="0.63" selected>Back-Side Illuminated BSI (0.63) Sony A7 III, Nikon Z6, Canon R6</option>
                         <option value="0.70">Stacked BSI CMOS (0.70) Sony A1, Nikon Z9, Canon R3</option>
                         <option value="0.73">Dual/Quad Pixel BSI (0.73) Canon R5(Dual), Sony A7R(Quad)</option>
@@ -193,12 +196,15 @@
                     </label>
                     <select id="resolutionPreset">
                         <option value="custom">Custom Resolution</option>
-                        <option value="sd">SD (640×480, 4:3)</option>
-                        <option value="hd">HD (1280×720, 16:9)</option>
-                        <option value="fhd">FHD (1920×1080, 16:9)</option>
-                        <option value="4k">4K UHD (3840×2160, 16:9)</option>
-                        <option value="6k">6K (6144×3456, 16:9)</option>
-                        <option value="8k">8K UHD (7680×4320, 16:9)</option>
+                        <option value="sd">SD (640×480, 4:3, 0.3MP)</option>
+                        <option value="hd">HD (1280×720, 16:9, 0.9MP)</option>
+                        <option value="fhd">FHD (1920×1080, 16:9, 2.1MP)</option>
+                        <option value="2k">2K (2048×1080, 1.9:1, 2.2MP)</option>
+                        <option value="qhd">QHD/2.5K (2560×1440, 16:9, 3.7MP)</option>
+                        <option value="uhd">UHD/4K (3840×2160, 16:9, 8.3MP)</option>
+                        <option value="4k-dci">4K DCI (4096×2160, 1.9:1, 8.8MP)</option>
+                        <option value="6k">6K (6144×3456, 16:9, 21.2MP)</option>
+                        <option value="8k">8K UHD (7680×4320, 16:9, 33.2MP)</option>
                         <option value="12mp">12 Megapixels (4000×3000, 4:3)</option>
                         <option value="16mp">16 Megapixels (4608×3456, 4:3)</option>
                         <option value="20mp">20 Megapixels (5472×3648, 3:2)</option>
@@ -287,7 +293,11 @@
                         <option value="0.87">Sigma Sport/Fuji Standard (0.87)</option>
                         <option value="0.86">Canon Non-L/Sigma Contemporary (0.86)</option>
                         <option value="0.85">Nikon Standard/Sony Standard (0.85)</option>
+                        <option value="0.82">Mid-range Dashcam Lens (0.82) IMX335 Dashcams</option>
                         <option value="0.80">Vintage/Legacy Lenses (0.80)</option>
+                        <option value="0.78">Basic Dashcam Lens (0.78) Entry Dashcams</option>
+                        <option value="0.75">Standard IPCam Lens (0.75) Mid-range Surveillance</option>
+                        <option value="0.70">Basic IPCam Lens (0.70) Budget Surveillance, No Coating</option>
                     </select>
                 </div>
             </div>
@@ -390,7 +400,10 @@
                 'sd': { width: 640, height: 480, aspect: '4:3' },
                 'hd': { width: 1280, height: 720, aspect: '16:9' },
                 'fhd': { width: 1920, height: 1080, aspect: '16:9' },
-                '4k': { width: 3840, height: 2160, aspect: '16:9' },
+                '2k': { width: 2048, height: 1080, aspect: '1.9:1' },
+                'qhd': { width: 2560, height: 1440, aspect: '16:9' },
+                'uhd': { width: 3840, height: 2160, aspect: '16:9' },
+                '4k-dci': { width: 4096, height: 2160, aspect: '1.9:1' },
                 '6k': { width: 6144, height: 3456, aspect: '16:9' },
                 '8k': { width: 7680, height: 4320, aspect: '16:9' },
                 '12mp': { width: 4000, height: 3000, aspect: '4:3' },
